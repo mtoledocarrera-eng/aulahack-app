@@ -1,0 +1,331 @@
+PASS src/lib/__tests__/flow.test.ts
+PASS src/lib/__tests__/storage.test.ts
+PASS src/lib/rag/__tests__/rag.test.ts
+  ● Console
+
+    console.error
+      [Embeddings] Error al generar embedding: EmbeddingError: GOOGLE_GENERATIVE_AI_API_KEY no está configurada.
+          at getGoogleAI (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\src\lib\rag\embeddings.ts:15:15)
+          at generateEmbedding (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\src\lib\rag\embeddings.ts:25:24)
+          at searchCurriculum (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\src\lib\rag\index.ts:62:59)
+          at Object.<anonymous> (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\src\lib\rag\__tests__\rag.test.ts:27:50)
+          at Promise.then.completed (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:316:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at _runTest (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:121:9)
+          at _runTestsForDescribeBlock (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-runner\build\runTest.js:444:34)
+          at Object.worker (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-runner\build\testWorker.js:106:12)
+
+    [0m [90m 31 |[39m         [36mreturn[39m embedding[33m.[39mvalues[33m;[39m
+     [90m 32 |[39m     } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 33 |[39m         console[33m.[39merror([32m"[Embeddings] Error al generar embedding:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 34 |[39m         [36mthrow[39m [36mnew[39m [33mEmbeddingError[39m([32m"Fallo al generar el vector de embeddings."[39m)[33m;[39m
+     [90m 35 |[39m     }
+     [90m 36 |[39m }[0m
+
+      at generateEmbedding (src/lib/rag/embeddings.ts:33:17)
+      at searchCurriculum (src/lib/rag/index.ts:62:59)
+      at Object.<anonymous> (src/lib/rag/__tests__/rag.test.ts:27:50)
+
+    console.warn
+      [RAG] Falló la búsqueda semántica, usando full text search local como fallback EmbeddingError: Fallo al generar el vector de embeddings.
+          at generateEmbedding (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\src\lib\rag\embeddings.ts:34:15)
+          at searchCurriculum (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\src\lib\rag\index.ts:62:59)
+          at Object.<anonymous> (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\src\lib\rag\__tests__\rag.test.ts:27:50)
+          at Promise.then.completed (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:316:40)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at _runTest (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:121:9)
+          at _runTestsForDescribeBlock (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-runner\build\runTest.js:444:34)
+          at Object.worker (C:\Users\mtole\OneDrive\Escritorio\Aplicaciones IA\360Hacks\node_modules\jest-runner\build\testWorker.js:106:12)
+
+    [0m [90m 83 |[39m             }
+     [90m 84 |[39m         } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 85 |[39m             console[33m.[39mwarn([32m"[RAG] Falló la búsqueda semántica, usando full text search local como fallback"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 86 |[39m             [90m// Fallback: Full text search simple[39m
+     [90m 87 |[39m             [36mconst[39m term [33m=[39m searchTerm[33m.[39mtoLowerCase()[33m;[39m
+     [90m 88 |[39m             topCandidates [33m=[39m [33mCURRICULUM_DATA[39m[0m
+
+      at searchCurriculum (src/lib/rag/index.ts:85:21)
+      at Object.<anonymous> (src/lib/rag/__tests__/rag.test.ts:27:28)
+
+FAIL src/lib/ai/__tests__/schemas.test.ts
+  ● Zod Schemas › teacherInputSchema › acepta input completo
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    [0m [90m 23 |[39m             }[33m;[39m
+     [90m 24 |[39m             [36mconst[39m result [33m=[39m teacherInputSchema[33m.[39msafeParse(input)[33m;[39m
+    [31m[1m>[22m[39m[90m 25 |[39m             expect(result[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m    |[39m                                    [31m[1m^[22m[39m
+     [90m 26 |[39m         })[33m;[39m
+     [90m 27 |[39m
+     [90m 28 |[39m         it([32m"acepta input parcial — Flip Prompting necesario"[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.<anonymous> (src/lib/ai/__tests__/schemas.test.ts:25:36)
+
+  ● Zod Schemas › teacherInputSchema › acepta input parcial — Flip Prompting necesario
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    [0m [90m 31 |[39m             }[33m;[39m
+     [90m 32 |[39m             [36mconst[39m result [33m=[39m teacherInputSchema[33m.[39msafeParse(input)[33m;[39m
+    [31m[1m>[22m[39m[90m 33 |[39m             expect(result[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m    |[39m                                    [31m[1m^[22m[39m
+     [90m 34 |[39m         })[33m;[39m
+     [90m 35 |[39m
+     [90m 36 |[39m         it([32m"acepta input vacío"[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.<anonymous> (src/lib/ai/__tests__/schemas.test.ts:33:36)
+
+  ● Zod Schemas › teacherInputSchema › acepta input vacío
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    [0m [90m 36 |[39m         it([32m"acepta input vacío"[39m[33m,[39m () [33m=>[39m {
+     [90m 37 |[39m             [36mconst[39m result [33m=[39m teacherInputSchema[33m.[39msafeParse({})[33m;[39m
+    [31m[1m>[22m[39m[90m 38 |[39m             expect(result[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m    |[39m                                    [31m[1m^[22m[39m
+     [90m 39 |[39m         })[33m;[39m
+     [90m 40 |[39m     })[33m;[39m
+     [90m 41 |[39m[0m
+
+      at Object.<anonymous> (src/lib/ai/__tests__/schemas.test.ts:38:36)
+
+  ● Zod Schemas › projectPlanSchema › valida planificación constructivista completa
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    [0m [90m 148 |[39m             }[33m;[39m
+     [90m 149 |[39m             [36mconst[39m result [33m=[39m projectPlanSchema[33m.[39msafeParse(plan)[33m;[39m
+    [31m[1m>[22m[39m[90m 150 |[39m             expect(result[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m     |[39m                                    [31m[1m^[22m[39m
+     [90m 151 |[39m         })[33m;[39m
+     [90m 152 |[39m
+     [90m 153 |[39m         it([32m"rechaza planificación sin fases obligatorias"[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.<anonymous> (src/lib/ai/__tests__/schemas.test.ts:150:36)
+
+PASS src/lib/ai/__tests__/flip-engine-errors.test.ts
+FAIL src/lib/ai/__tests__/rubric-generation.test.ts
+  ● Console
+
+    console.error
+      [FlipEngine] gemini-2.5-flash returned invalid JSON: invalid json
+
+    [0m [90m 272 |[39m             }
+     [90m 273 |[39m         }
+    [31m[1m>[22m[39m[90m 274 |[39m         console[33m.[39merror([32m`[FlipEngine] ${modelName} returned invalid JSON:`[39m[33m,[39m text[33m.[39msubstring([35m0[39m[33m,[39m [35m300[39m))[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 275 |[39m         [36mthrow[39m [36mnew[39m [33mError[39m([32m`${modelName} returned invalid JSON`[39m)[33m;[39m
+     [90m 276 |[39m     }
+     [90m 277 |[39m }[0m
+
+      at parseJSONSafe (src/lib/ai/flip-engine.ts:274:17)
+      at callModel (src/lib/ai/flip-engine.ts:195:18)
+      at generateWithFallback (src/lib/ai/flip-engine.ts:136:20)
+
+    console.warn
+      [FlipEngine] Model (gemini-2.5-flash) failed, trying next... gemini-2.5-flash returned invalid JSON
+
+    [0m [90m 138 |[39m             lastError [33m=[39m error[33m;[39m
+     [90m 139 |[39m             [36mconst[39m isQuota [33m=[39m isQuotaError(error)[33m;[39m
+    [31m[1m>[22m[39m[90m 140 |[39m             console[33m.[39mwarn(
+     [90m     |[39m                     [31m[1m^[22m[39m
+     [90m 141 |[39m                 [32m`[FlipEngine] Model (${modelName}) failed${isQuota ? ' (quota)' : ''}, trying next...`[39m[33m,[39m
+     [90m 142 |[39m                 error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m error
+     [90m 143 |[39m             )[33m;[39m[0m
+
+      at generateWithFallback (src/lib/ai/flip-engine.ts:140:21)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+    console.error
+      [FlipEngine] gemini-2.5-flash-lite returned invalid JSON: invalid json
+
+    [0m [90m 272 |[39m             }
+     [90m 273 |[39m         }
+    [31m[1m>[22m[39m[90m 274 |[39m         console[33m.[39merror([32m`[FlipEngine] ${modelName} returned invalid JSON:`[39m[33m,[39m text[33m.[39msubstring([35m0[39m[33m,[39m [35m300[39m))[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 275 |[39m         [36mthrow[39m [36mnew[39m [33mError[39m([32m`${modelName} returned invalid JSON`[39m)[33m;[39m
+     [90m 276 |[39m     }
+     [90m 277 |[39m }[0m
+
+      at parseJSONSafe (src/lib/ai/flip-engine.ts:274:17)
+      at callModel (src/lib/ai/flip-engine.ts:195:18)
+      at generateWithFallback (src/lib/ai/flip-engine.ts:136:20)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+    console.warn
+      [FlipEngine] Model (gemini-2.5-flash-lite) failed, trying next... gemini-2.5-flash-lite returned invalid JSON
+
+    [0m [90m 138 |[39m             lastError [33m=[39m error[33m;[39m
+     [90m 139 |[39m             [36mconst[39m isQuota [33m=[39m isQuotaError(error)[33m;[39m
+    [31m[1m>[22m[39m[90m 140 |[39m             console[33m.[39mwarn(
+     [90m     |[39m                     [31m[1m^[22m[39m
+     [90m 141 |[39m                 [32m`[FlipEngine] Model (${modelName}) failed${isQuota ? ' (quota)' : ''}, trying next...`[39m[33m,[39m
+     [90m 142 |[39m                 error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m error
+     [90m 143 |[39m             )[33m;[39m[0m
+
+      at generateWithFallback (src/lib/ai/flip-engine.ts:140:21)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+    console.error
+      [FlipEngine] gemini-2.0-flash returned invalid JSON: invalid json
+
+    [0m [90m 272 |[39m             }
+     [90m 273 |[39m         }
+    [31m[1m>[22m[39m[90m 274 |[39m         console[33m.[39merror([32m`[FlipEngine] ${modelName} returned invalid JSON:`[39m[33m,[39m text[33m.[39msubstring([35m0[39m[33m,[39m [35m300[39m))[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 275 |[39m         [36mthrow[39m [36mnew[39m [33mError[39m([32m`${modelName} returned invalid JSON`[39m)[33m;[39m
+     [90m 276 |[39m     }
+     [90m 277 |[39m }[0m
+
+      at parseJSONSafe (src/lib/ai/flip-engine.ts:274:17)
+      at callModel (src/lib/ai/flip-engine.ts:195:18)
+      at generateWithFallback (src/lib/ai/flip-engine.ts:136:20)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+    console.warn
+      [FlipEngine] Model (gemini-2.0-flash) failed, trying next... gemini-2.0-flash returned invalid JSON
+
+    [0m [90m 138 |[39m             lastError [33m=[39m error[33m;[39m
+     [90m 139 |[39m             [36mconst[39m isQuota [33m=[39m isQuotaError(error)[33m;[39m
+    [31m[1m>[22m[39m[90m 140 |[39m             console[33m.[39mwarn(
+     [90m     |[39m                     [31m[1m^[22m[39m
+     [90m 141 |[39m                 [32m`[FlipEngine] Model (${modelName}) failed${isQuota ? ' (quota)' : ''}, trying next...`[39m[33m,[39m
+     [90m 142 |[39m                 error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m error
+     [90m 143 |[39m             )[33m;[39m[0m
+
+      at generateWithFallback (src/lib/ai/flip-engine.ts:140:21)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+    console.error
+      [FlipEngine] gemini-1.5-flash returned invalid JSON: invalid json
+
+    [0m [90m 272 |[39m             }
+     [90m 273 |[39m         }
+    [31m[1m>[22m[39m[90m 274 |[39m         console[33m.[39merror([32m`[FlipEngine] ${modelName} returned invalid JSON:`[39m[33m,[39m text[33m.[39msubstring([35m0[39m[33m,[39m [35m300[39m))[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 275 |[39m         [36mthrow[39m [36mnew[39m [33mError[39m([32m`${modelName} returned invalid JSON`[39m)[33m;[39m
+     [90m 276 |[39m     }
+     [90m 277 |[39m }[0m
+
+      at parseJSONSafe (src/lib/ai/flip-engine.ts:274:17)
+      at callModel (src/lib/ai/flip-engine.ts:195:18)
+      at generateWithFallback (src/lib/ai/flip-engine.ts:136:20)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+    console.warn
+      [FlipEngine] Model (gemini-1.5-flash) failed, trying next... gemini-1.5-flash returned invalid JSON
+
+    [0m [90m 138 |[39m             lastError [33m=[39m error[33m;[39m
+     [90m 139 |[39m             [36mconst[39m isQuota [33m=[39m isQuotaError(error)[33m;[39m
+    [31m[1m>[22m[39m[90m 140 |[39m             console[33m.[39mwarn(
+     [90m     |[39m                     [31m[1m^[22m[39m
+     [90m 141 |[39m                 [32m`[FlipEngine] Model (${modelName}) failed${isQuota ? ' (quota)' : ''}, trying next...`[39m[33m,[39m
+     [90m 142 |[39m                 error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m error
+     [90m 143 |[39m             )[33m;[39m[0m
+
+      at generateWithFallback (src/lib/ai/flip-engine.ts:140:21)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+    console.error
+      [FlipEngine] gemini-1.5-flash-8b returned invalid JSON: invalid json
+
+    [0m [90m 272 |[39m             }
+     [90m 273 |[39m         }
+    [31m[1m>[22m[39m[90m 274 |[39m         console[33m.[39merror([32m`[FlipEngine] ${modelName} returned invalid JSON:`[39m[33m,[39m text[33m.[39msubstring([35m0[39m[33m,[39m [35m300[39m))[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 275 |[39m         [36mthrow[39m [36mnew[39m [33mError[39m([32m`${modelName} returned invalid JSON`[39m)[33m;[39m
+     [90m 276 |[39m     }
+     [90m 277 |[39m }[0m
+
+      at parseJSONSafe (src/lib/ai/flip-engine.ts:274:17)
+      at callModel (src/lib/ai/flip-engine.ts:195:18)
+      at generateWithFallback (src/lib/ai/flip-engine.ts:136:20)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+    console.warn
+      [FlipEngine] Model (gemini-1.5-flash-8b) failed, trying next... gemini-1.5-flash-8b returned invalid JSON
+
+    [0m [90m 138 |[39m             lastError [33m=[39m error[33m;[39m
+     [90m 139 |[39m             [36mconst[39m isQuota [33m=[39m isQuotaError(error)[33m;[39m
+    [31m[1m>[22m[39m[90m 140 |[39m             console[33m.[39mwarn(
+     [90m     |[39m                     [31m[1m^[22m[39m
+     [90m 141 |[39m                 [32m`[FlipEngine] Model (${modelName}) failed${isQuota ? ' (quota)' : ''}, trying next...`[39m[33m,[39m
+     [90m 142 |[39m                 error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m error
+     [90m 143 |[39m             )[33m;[39m[0m
+
+      at generateWithFallback (src/lib/ai/flip-engine.ts:140:21)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+    console.error
+      [FlipEngine] All models failed. Last error: gemini-1.5-flash-8b returned invalid JSON
+
+    [0m [90m 153 |[39m     }
+     [90m 154 |[39m
+    [31m[1m>[22m[39m[90m 155 |[39m     console[33m.[39merror(
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 156 |[39m         [32m`[FlipEngine] All models failed. Last error:`[39m[33m,[39m
+     [90m 157 |[39m         lastError [36minstanceof[39m [33mError[39m [33m?[39m lastError[33m.[39mmessage [33m:[39m lastError
+     [90m 158 |[39m     )[33m;[39m[0m
+
+      at generateWithFallback (src/lib/ai/flip-engine.ts:155:13)
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:91:9)
+
+  ● generateRubric › falla si ambos modelos devuelven JSON inválido
+
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+    Expected number of calls: 2
+    Received number of calls: 5
+
+    [0m [90m 91 |[39m         [36mawait[39m expect(generateRubric(mockProjectPlan))[33m.[39mrejects[33m.[39mtoThrow()[33m;[39m
+     [90m 92 |[39m         [90m// Debería intentar con ambos modelos antes de fallar definitivamente[39m
+    [31m[1m>[22m[39m[90m 93 |[39m         expect(mockGenerateContent)[33m.[39mtoHaveBeenCalledTimes([35m2[39m)[33m;[39m
+     [90m    |[39m                                     [31m[1m^[22m[39m
+     [90m 94 |[39m     })[33m;[39m
+     [90m 95 |[39m })[33m;[39m
+     [90m 96 |[39m[0m
+
+      at Object.<anonymous> (src/lib/ai/__tests__/rubric-generation.test.ts:93:37)
+
+PASS src/lib/payments/__tests__/flow.test.ts
+
+Test Suites: 2 failed, 5 passed, 7 total
+Tests:       5 failed, 43 passed, 48 total
+Snapshots:   0 total
+Time:        8.423 s
+Ran all test suites.

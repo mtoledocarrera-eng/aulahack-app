@@ -89,7 +89,7 @@ describe("generateRubric", () => {
         });
 
         await expect(generateRubric(mockProjectPlan)).rejects.toThrow();
-        // Debería intentar con ambos modelos antes de fallar definitivamente
-        expect(mockGenerateContent).toHaveBeenCalledTimes(2);
+        // Debería intentar con todos los modelos en cascada (5) antes de fallar definitivamente
+        expect(mockGenerateContent).toHaveBeenCalledTimes(5);
     });
 });

@@ -13,13 +13,10 @@ describe("Zod Schemas", () => {
     describe("teacherInputSchema", () => {
         it("acepta input completo", () => {
             const input = {
+                proposito: "Comprender la importancia de las plantas",
                 nivel: "3° Básico",
                 asignatura: "Ciencias Naturales",
-                oa: "OA 1",
-                duracion: "90 minutos",
                 contexto: "Curso de 35 estudiantes",
-                necesidades_especiales: "2 estudiantes con TEA",
-                mensaje_libre: "Quiero una clase sobre plantas",
             };
             const result = teacherInputSchema.safeParse(input);
             expect(result.success).toBe(true);
@@ -27,15 +24,15 @@ describe("Zod Schemas", () => {
 
         it("acepta input parcial — Flip Prompting necesario", () => {
             const input = {
-                mensaje_libre: "Quiero planificar una clase de mate",
+                proposito: "Quiero planificar una clase de mate",
             };
             const result = teacherInputSchema.safeParse(input);
             expect(result.success).toBe(true);
         });
 
-        it("acepta input vacío", () => {
+        it("falla si no viene el propósito obligatorio", () => {
             const result = teacherInputSchema.safeParse({});
-            expect(result.success).toBe(true);
+            expect(result.success).toBe(false);
         });
     });
 
@@ -138,6 +135,7 @@ describe("Zod Schemas", () => {
                     representacion: "Material concreto + visual",
                     accion_expresion: "Oral, escrito, o manipulativo",
                     compromiso: "Trabajo en pareja con roles rotativos",
+                    ajustes_ambientales_y_sensoriales_tea: "Reducir el nivel de ruido durante trabajo grupal",
                 },
                 recursos_generales: ["Pizarra", "Marcadores"],
                 guia_docente: {
@@ -145,6 +143,7 @@ describe("Zod Schemas", () => {
                     posibles_obstaculos_y_soluciones: "N/A",
                     conexiones_vida_real: "N/A",
                 },
+                indicador_desarrollo_personal_social: "Autoestima Académica",
             };
             const result = projectPlanSchema.safeParse(plan);
             expect(result.success).toBe(true);
