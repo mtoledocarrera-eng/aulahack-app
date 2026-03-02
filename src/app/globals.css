@@ -1,0 +1,168 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 210 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 10% 10%;
+    --primary: 174 52% 37%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 15% 94%;
+    --secondary-foreground: 210 10% 15%;
+    --muted: 210 15% 94%;
+    --muted-foreground: 210 8% 46%;
+    --accent: 24 94% 53%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 12% 88%;
+    --input: 210 12% 88%;
+    --ring: 174 52% 37%;
+    --radius: 0.5rem;
+    --chart-1: 174 52% 37%;
+    --chart-2: 24 94% 53%;
+    --chart-3: 210 60% 50%;
+    --chart-4: 142 60% 45%;
+    --chart-5: 280 65% 60%;
+  }
+
+  .dark {
+    --background: 220 22% 5%;
+    --foreground: 210 20% 95%;
+    --card: 220 20% 7%;
+    --card-foreground: 210 20% 95%;
+    --popover: 220 20% 7%;
+    --popover-foreground: 210 20% 95%;
+    --primary: 174 52% 37%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 12%;
+    --secondary-foreground: 210 20% 90%;
+    --muted: 220 15% 12%;
+    --muted-foreground: 210 10% 55%;
+    --accent: 24 94% 53%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 15% 14%;
+    --input: 220 15% 14%;
+    --ring: 174 52% 37%;
+    --chart-1: 174 52% 37%;
+    --chart-2: 24 94% 53%;
+    --chart-3: 210 60% 50%;
+    --chart-4: 142 60% 45%;
+    --chart-5: 280 65% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* DUA: Focus visible for keyboard navigation */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-dua-focus ring-2 ring-dua-focus;
+  }
+
+  /* DUA: Minimum touch targets */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    @apply min-h-touch min-w-touch;
+  }
+
+  /* DUA: Reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* DUA: High contrast mode support */
+  @media (forced-colors: active) {
+    .btn-primary {
+      border: 2px solid ButtonText;
+    }
+  }
+}
+
+@layer components {
+
+  /* Glass morphism card */
+  .glass-card {
+    @apply bg-white/90 backdrop-blur-xl border border-brand-200/30 rounded-2xl;
+    box-shadow: 0 4px 20px rgb(0 0 0 / 0.06);
+  }
+
+  :is(.dark) .glass-card {
+    @apply bg-[#0f131f]/70 border-brand-500/20;
+    box-shadow: 0 0 15px rgba(20, 184, 166, 0.05);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-600 via-brand-500 to-neon-500 bg-clip-text text-transparent;
+  }
+
+  :is(.dark) .gradient-text {
+    @apply from-brand-400 via-brand-500 to-neon-400;
+  }
+
+  /* Animated gradient background */
+  .gradient-bg {
+    @apply bg-gradient-to-br from-brand-50/40 via-white to-neon-50/30;
+  }
+
+  :is(.dark) .gradient-bg {
+    background-color: #0c0f16;
+    background-image: radial-gradient(ellipse at top, rgba(20, 184, 166, 0.06), #0c0f16, #0a0c10);
+  }
+
+  /* Lesson step indicator */
+  .step-indicator {
+    @apply flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold transition-all duration-300;
+  }
+
+  .step-indicator.active {
+    @apply bg-brand-600 text-white scale-110 shadow-lg shadow-brand-600/30;
+  }
+
+  .step-indicator.completed {
+    @apply bg-dua-success text-white;
+  }
+
+  .step-indicator.pending {
+    @apply bg-muted text-muted-foreground;
+  }
+}
+
+@layer utilities {
+
+  /* Smooth page transitions */
+  .page-enter {
+    @apply animate-fade-in;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse-subtle bg-muted rounded-md;
+  }
+}

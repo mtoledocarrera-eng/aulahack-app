@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html><head><title>Icon Converter</title></head>
+<body style="background:#1a1a2e;color:white;font-family:Arial;padding:2rem;">
+<h1>360Hacks Icon Generator</h1>
+<p>Right-click each icon → "Save image as..." to save as PNG</p>
+<div style="display:flex;gap:2rem;align-items:start;margin-top:2rem;">
+
+  <div>
+    <h3>192×192</h3>
+    <canvas id="c192" width="192" height="192"></canvas>
+    <br><a id="dl192" style="color:#60a5fa;cursor:pointer;">⬇ Download PNG</a>
+  </div>
+
+  <div>
+    <h3>512×512</h3>
+    <canvas id="c512" width="512" height="512"></canvas>
+    <br><a id="dl512" style="color:#60a5fa;cursor:pointer;">⬇ Download PNG</a>
+  </div>
+
+</div>
+<script>
+function draw(id, s) {
+  var c = document.getElementById(id);
+  var x = c.getContext('2d');
+  var g = x.createLinearGradient(0, 0, s, s);
+  g.addColorStop(0, '#2563eb');
+  g.addColorStop(1, '#1d4ed8');
+  x.fillStyle = g;
+  x.beginPath();
+  x.roundRect(0, 0, s, s, s * 0.2);
+  x.fill();
+  x.fillStyle = 'white';
+  x.font = 'bold ' + Math.floor(s * 0.28) + 'px Arial';
+  x.textAlign = 'center';
+  x.textBaseline = 'middle';
+  x.fillText('360', s / 2, s * 0.38);
+  x.font = 'bold ' + Math.floor(s * 0.14) + 'px Arial';
+  x.fillText('HACKS', s / 2, s * 0.62);
+  x.strokeStyle = 'rgba(255,255,255,0.3)';
+  x.lineWidth = s * 0.02;
+  x.beginPath();
+  x.arc(s / 2, s * 0.38, s * 0.22, 0, Math.PI * 1.8);
+  x.stroke();
+}
+draw('c512', 512);
+draw('c192', 192);
+
+document.getElementById('dl512').onclick = function() {
+  var a = document.createElement('a');
+  a.download = 'icon-512.png';
+  a.href = document.getElementById('c512').toDataURL('image/png');
+  a.click();
+};
+document.getElementById('dl192').onclick = function() {
+  var a = document.createElement('a');
+  a.download = 'icon-192.png';
+  a.href = document.getElementById('c192').toDataURL('image/png');
+  a.click();
+};
+</script>
+</body></html>

@@ -1,0 +1,60 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║         CONSTITUCIÓN DEL PROYECTO — PROTOCOLO CERO             ║
+# ║              360Hacks · SaaS Educativo Chile                   ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+# ─── DOMINIO ───────────────────────────────────────────────────────
+# Plataforma SaaS para docentes chilenos.
+# Marco legal: Decreto 67 (Evaluación), Decreto 83 (Diversificación),
+#              Ley 20.903 (Desarrollo Profesional Docente).
+# Diseño Universal para el Aprendizaje (DUA) es OBLIGATORIO en toda
+# generación pedagógica.
+
+# ─── STACK TECNOLÓGICO ─────────────────────────────────────────────
+# Frontend: Next.js 15 (App Router), TypeScript strict, Tailwind CSS
+# Componentes: Shadcn/ui + Radix UI primitives
+# Backend: Firebase Auth + Firestore
+# IA: Vercel AI SDK → gemini-3.1-pro-preview (fallback: gemini-3.1-flash)
+# Pagos: Flow.cl (mock en fase MVP)
+# PDF: @react-pdf/renderer
+
+# ─── REGLA CARDINAL: FLIP PROMPTING ───────────────────────────────
+# PROHIBIDO generar contenido pedagógico sin antes interrogar al docente.
+# El motor de IA DEBE:
+#   1. Recibir input parcial del docente
+#   2. Detectar campos faltantes (nivel, asignatura, OA, contexto)
+#   3. Generar preguntas clarificadoras (FLIP)
+#   4. Solo tras respuesta completa → generar planificación
+#
+# Violación de esta regla = bug crítico P0.
+
+# ─── ANTI-ALUCINACIÓN ─────────────────────────────────────────────
+# 1. NUNCA inventar Objetivos de Aprendizaje (OAs).
+#    → Usar EXCLUSIVAMENTE la base RAG con datos curriculares oficiales.
+# 2. Si un OA no se encuentra en la base RAG → responder:
+#    "No encontré este OA en el currículum vigente. ¿Puedes verificar?"
+# 3. Temperatura del modelo: 0.3 para generación pedagógica.
+# 4. Penalización de repetición: 1.2 para evitar "Repeat Curse".
+# 5. Prompt negativo obligatorio en system prompt:
+#    "No inventes información curricular. No repitas párrafos."
+
+# ─── SEGURIDAD ─────────────────────────────────────────────────────
+# - Firebase Rules: aislamiento estricto por uid del docente.
+# - CERO PII en logs o telemetría.
+# - API keys solo en variables de entorno server-side.
+# - Flow.cl: validación de firma HMAC en webhooks.
+
+# ─── ESTRUCTURA DE CLASE (5 PASOS) ────────────────────────────────
+# Toda planificación generada DEBE seguir esta estructura:
+#   PASO 1: Inicio (activación de conocimientos previos)
+#   PASO 2: Desarrollo (actividades diferenciadas DUA)
+#   PASO 3: Cierre (síntesis y metacognición)
+#   PASO 4: Evaluación (instrumentos y criterios Decreto 67)
+#   PASO 5: Adecuaciones DUA (representación, acción, compromiso)
+
+# ─── VIBE CODING: PROHIBIDO ───────────────────────────────────────
+# Todo código generado DEBE:
+#   - Tener tipado estricto TypeScript (no any, no unknown sin narrowing)
+#   - Pasar ESLint sin warnings
+#   - Incluir validación Zod en boundaries (API routes, form inputs)
+#   - Ser revisado contra esta constitución antes de merge
