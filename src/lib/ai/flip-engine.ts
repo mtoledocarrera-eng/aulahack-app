@@ -31,9 +31,9 @@ import { logAnalyticsEvent } from "@/lib/firebase/analytics";
 const MODEL_CASCADE = [
     process.env.AI_MODEL_PRIMARY || "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
-    process.env.AI_MODEL_FALLBACK || "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-flash-8b"
+    process.env.AI_MODEL_FALLBACK || "gemini-3-flash-preview",
+    "gemini-3.1-flash-lite-preview",
+    "gemini-2.5-pro"
 ];
 
 const MAX_HEAL_RETRIES = 1;

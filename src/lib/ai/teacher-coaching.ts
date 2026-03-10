@@ -142,7 +142,7 @@ export function buildTeacherProfile(plans: StoredLessonPlan[]): TeacherProfile {
 const MODEL_CASCADE = [
     process.env.AI_MODEL_PRIMARY || "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
-    process.env.AI_MODEL_FALLBACK || "gemini-2.0-flash",
+    process.env.AI_MODEL_FALLBACK || "gemini-3-flash-preview",
 ];
 
 const COACHING_PROMPT = `Eres un Mentor Senior de Desarrollo Profesional Docente en Chile.
