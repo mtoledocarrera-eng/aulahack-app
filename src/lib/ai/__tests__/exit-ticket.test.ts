@@ -1,4 +1,4 @@
-import { buildUniversalExitTicket } from "../exit-ticket";
+import { buildUniversalExitTicket, normalizeExitTicket } from "../exit-ticket";
 import { exitTicketSchema, type ProjectPlan } from "../schemas";
 
 const mockPlan = {
@@ -112,5 +112,18 @@ describe("Ticket de salida de Aprender a aprender", () => {
 
         expect(ticket.preguntas[0].enunciado).toContain("sobre el OA 8 de Ciencias Naturales");
         expect(ticket.preguntas[0].enunciado).not.toContain("OA OA");
+    });
+
+    it("corrige tickets históricos con el prefijo duplicado", () => {
+        const ticket = buildUniversalExitTicket(mockPlan);
+        const legacyTicket = {
+            ...ticket,
+            preguntas: ticket.preguntas.map((pregunta) => ({
+                ...pregunta,
+                enunciado: pregunta.enunciado.replace("OA 8", "OA OA 8"),
+            })),
+        };
+
+        expect(normalizeExitTicket(legacyTicket).preguntas[0].enunciado).not.toContain("OA OA");
     });
 });

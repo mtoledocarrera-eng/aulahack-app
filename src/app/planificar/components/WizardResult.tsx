@@ -13,7 +13,7 @@ const GradingMatrix = dynamic(() => import("@/components/GradingMatrix").then(mo
 });
 
 import type { ProjectPlan, Rubric, Worksheet, LearningCycle, ExitTicket } from "@/lib/ai/schemas";
-import { buildUniversalExitTicket } from "@/lib/ai/exit-ticket";
+import { buildUniversalExitTicket, normalizeExitTicket } from "@/lib/ai/exit-ticket";
 
 interface WizardResultProps {
     uid: string;
@@ -45,7 +45,7 @@ export function WizardResult({
     isGeneratingRubric, isGeneratingWorksheet, isExporting, retryCountdown,
     onReset, onGenerateRubric, onGenerateWorksheet, onExportPDF, onIterate
 }: WizardResultProps) {
-    const exitTicket = projectPlan.ticket_salida ?? buildUniversalExitTicket(projectPlan);
+    const exitTicket = normalizeExitTicket(projectPlan.ticket_salida ?? buildUniversalExitTicket(projectPlan));
 
     return (
         <div className="animate-fade-in space-y-6">

@@ -65,3 +65,14 @@ export function buildUniversalExitTicket(plan: ProjectPlan): ExitTicket {
         },
     };
 }
+
+/** Corrige etiquetas antiguas persistidas sin cambiar el contenido pedagógico. */
+export function normalizeExitTicket(ticket: ExitTicket): ExitTicket {
+    return {
+        ...ticket,
+        preguntas: ticket.preguntas.map((pregunta) => ({
+            ...pregunta,
+            enunciado: pregunta.enunciado.replace(/\bOA\s+OA\b/gi, "OA"),
+        })),
+    };
+}

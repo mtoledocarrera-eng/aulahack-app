@@ -15,7 +15,7 @@ import {
     Font,
 } from "@react-pdf/renderer";
 import type { ProjectPlan, Rubric, LearningCycle } from "@/lib/ai/schemas";
-import { buildUniversalExitTicket } from "@/lib/ai/exit-ticket";
+import { buildUniversalExitTicket, normalizeExitTicket } from "@/lib/ai/exit-ticket";
 
 // ─── Styles ──────────────────────────────────────────────────────
 
@@ -470,7 +470,7 @@ export function LessonPlanPDF({ plan, rubric, teacherName }: LessonPlanPDFProps)
         month: "long",
         year: "numeric",
     }).format(new Date());
-    const exitTicket = plan.ticket_salida ?? buildUniversalExitTicket(plan);
+    const exitTicket = normalizeExitTicket(plan.ticket_salida ?? buildUniversalExitTicket(plan));
 
     return (
         <Document>
