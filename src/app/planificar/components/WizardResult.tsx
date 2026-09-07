@@ -1,4 +1,4 @@
-import { CheckCircle2, Sparkles, Edit3, Loader2, FileText, NotebookPen, ClipboardList, Download } from "lucide-react";
+import { CheckCircle2, Sparkles, Edit3, Loader2, FileText, NotebookPen, ClipboardList, Download, TicketCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import dynamic from "next/dynamic";
@@ -12,7 +12,8 @@ const GradingMatrix = dynamic(() => import("@/components/GradingMatrix").then(mo
     loading: () => <div className="p-8 text-center text-muted-foreground animate-pulse">Cargando matriz de calificación...</div>
 });
 
-import type { ProjectPlan, Rubric, Worksheet, LearningCycle } from "@/lib/ai/schemas";
+import type { ProjectPlan, Rubric, Worksheet, LearningCycle, ExitTicket } from "@/lib/ai/schemas";
+import { buildUniversalExitTicket } from "@/lib/ai/exit-ticket";
 
 interface WizardResultProps {
     uid: string;
@@ -44,6 +45,8 @@ export function WizardResult({
     isGeneratingRubric, isGeneratingWorksheet, isExporting, retryCountdown,
     onReset, onGenerateRubric, onGenerateWorksheet, onExportPDF, onIterate
 }: WizardResultProps) {
+    const exitTicket = projectPlan.ticket_salida ?? buildUniversalExitTicket(projectPlan);
+
     return (
         <div className="animate-fade-in space-y-6">
             <div className="glass-card p-8">
@@ -126,6 +129,8 @@ export function WizardResult({
                     {projectPlan.ciclo_aprendizaje && (
                         <LearningCycleCard cycle={projectPlan.ciclo_aprendizaje} />
                     )}
+
+                    <ExitTicketCard ticket={exitTicket} />
 
                     <div className="p-6 rounded-xl border border-border/50 bg-muted/30">
                         <div className="flex items-center gap-3 mb-3">
@@ -394,6 +399,60 @@ function LearningCycleCard({ cycle }: { cycle: LearningCycle }) {
                 <p className="text-xs font-bold text-violet-700 dark:text-violet-300 mb-1">Preguntas metacognitivas</p>
                 <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
                     {cycle.preguntas_metacognitivas.map((question, index) => <li key={index}>{question}</li>)}
+                </ul>
+            </div>
+        </div>
+    );
+}
+
+function ExitTicketCard({ ticket }: { ticket: ExitTicket }) {
+    return (
+        <div className="p-6 rounded-xl border-2 border-cyan-200 dark:border-cyan-800 bg-cyan-50/50 dark:bg-cyan-900/10">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="w-9 h-9 rounded-lg bg-cyan-600 text-white flex items-center justify-center">
+                    <TicketCheck className="w-5 h-5" />
+                </div>
+                <div>
+                    <h3 className="font-bold text-lg text-cyan-950 dark:text-cyan-100">{ticket.titulo}</h3>
+                    <p className="text-xs text-muted-foreground">Respuesta individual · {ticket.tiempo_estimado}</p>
+                </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">{ticket.instrucciones}</p>
+
+            <div className="space-y-3">
+                {ticket.preguntas.map((pregunta) => (
+                    <div key={pregunta.numero} className="rounded-lg border border-cyan-200/80 dark:border-cyan-800/80 bg-background/70 p-4">
+                        <div className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-cyan-600 text-white flex items-center justify-center text-sm font-bold">{pregunta.numero}</span>
+                            <div>
+                                <p className="text-sm font-semibold text-cyan-900 dark:text-cyan-200">
+                                    {pregunta.tipo === "evidencia" ? "Demostrar lo aprendido" : "Explicar cómo aprendí"}
+                                </p>
+                                <p className="text-sm mt-1">{pregunta.enunciado}</p>
+                                <p className="text-xs text-muted-foreground mt-2"><strong>Evidencia esperada:</strong> {pregunta.evidencia_esperada}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="mt-4 rounded-lg border border-dashed border-cyan-300 dark:border-cyan-700 bg-cyan-100/40 dark:bg-cyan-900/20 p-4">
+                <p className="text-sm font-semibold text-cyan-900 dark:text-cyan-200">{ticket.extension_visual.titulo}</p>
+                <p className="text-sm mt-1">{ticket.extension_visual.enunciado}</p>
+                <p className="text-xs text-muted-foreground mt-2"><strong>Opciones equivalentes:</strong> {ticket.extension_visual.formas_equivalentes.join(" · ")}</p>
+                <p className="text-xs text-muted-foreground mt-1"><strong>Criterio:</strong> {ticket.extension_visual.criterio}</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-3 mt-4">
+                <DUACard title="Representación" content={ticket.apoyos_dua.representacion} />
+                <DUACard title="Acción y expresión" content={ticket.apoyos_dua.accion_expresion} />
+                <DUACard title="Compromiso" content={ticket.apoyos_dua.compromiso} />
+            </div>
+
+            <div className="mt-4">
+                <p className="text-sm font-semibold text-cyan-900 dark:text-cyan-200 mb-1">Criterios rápidos de revisión</p>
+                <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
+                    {ticket.criterios_revision.map((criterio, i) => <li key={i}>{criterio}</li>)}
                 </ul>
             </div>
         </div>

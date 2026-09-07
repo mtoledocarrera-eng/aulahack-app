@@ -106,6 +106,39 @@ export const officialOAReferenceSchema = z.object({
     es_basal: z.boolean().optional(),
 });
 
+// ─── Ticket de salida: Aprender a aprender ───────────────────────
+// Las dos preguntas centrales son universales y obligatorias. La
+// representación visual es una extensión opcional y no se califica por
+// destreza gráfica.
+export const exitTicketQuestionSchema = z.object({
+    numero: z.number().int().min(1).max(2),
+    tipo: z.enum(["evidencia", "metacognicion"]),
+    enunciado: z.string(),
+    evidencia_esperada: z.string(),
+});
+
+export const exitTicketSchema = z.object({
+    titulo: z.string(),
+    tiempo_estimado: z.string(),
+    instrucciones: z.string(),
+    preguntas: z.array(exitTicketQuestionSchema).length(2),
+    criterios_revision: z.array(z.string()).min(2).max(4),
+    extension_visual: z.object({
+        titulo: z.string(),
+        enunciado: z.string(),
+        formas_equivalentes: z.array(z.string()).min(1).max(4),
+        criterio: z.string(),
+    }),
+    apoyos_dua: z.object({
+        representacion: z.string(),
+        accion_expresion: z.string(),
+        compromiso: z.string(),
+    }),
+});
+
+export type ExitTicketQuestion = z.infer<typeof exitTicketQuestionSchema>;
+export type ExitTicket = z.infer<typeof exitTicketSchema>;
+
 /** Trazabilidad pedagógica de cada OA: actividad, evidencia y criterio. */
 export const oaAlignmentSchema = z.object({
     numero: z.string().describe("Código o número exacto del OA recuperado"),
@@ -136,6 +169,7 @@ export const projectPlanSchema = z.object({
 
     evaluacion: evaluationSchema.describe("Estrategia de evaluación según Decreto 67"),
     ciclo_aprendizaje: learningCycleSchema.optional().describe("Secuencia hipótesis, acción, evidencia, registro, feedback, revisión y nueva explicación"),
+    ticket_salida: exitTicketSchema.optional().describe("Ticket de salida universal de Aprender a aprender: evidencia y metacognición obligatorias; extensión visual opcional"),
     adecuaciones_dua: duaAdaptationSchema.describe("Adecuaciones macro del proyecto según Decreto 83"),
 
     // Metadata & Apoyo al Docente

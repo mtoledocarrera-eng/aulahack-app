@@ -15,6 +15,7 @@ import {
     Font,
 } from "@react-pdf/renderer";
 import type { ProjectPlan, Rubric, LearningCycle } from "@/lib/ai/schemas";
+import { buildUniversalExitTicket } from "@/lib/ai/exit-ticket";
 
 // ─── Styles ──────────────────────────────────────────────────────
 
@@ -284,6 +285,59 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
         marginBottom: 4,
     },
+    ticketBox: {
+        backgroundColor: "#ecfeff",
+        borderRadius: 6,
+        padding: 12,
+        marginBottom: 14,
+        borderLeft: "3px solid #0891b2",
+    },
+    ticketTitle: {
+        fontSize: 11,
+        fontFamily: "Helvetica-Bold",
+        color: "#0e7490",
+        marginBottom: 4,
+    },
+    ticketIntro: {
+        fontSize: 9,
+        color: colors.textMuted,
+        marginBottom: 8,
+    },
+    ticketQuestion: {
+        backgroundColor: colors.white,
+        borderRadius: 4,
+        padding: 8,
+        marginBottom: 6,
+    },
+    ticketQuestionTitle: {
+        fontSize: 9,
+        fontFamily: "Helvetica-Bold",
+        color: "#0e7490",
+        marginBottom: 3,
+    },
+    ticketQuestionText: {
+        fontSize: 9,
+        lineHeight: 1.35,
+        marginBottom: 3,
+    },
+    ticketExpected: {
+        fontSize: 8,
+        color: colors.textMuted,
+        lineHeight: 1.3,
+    },
+    ticketExtension: {
+        backgroundColor: "#cffafe",
+        borderRadius: 4,
+        padding: 8,
+        marginTop: 2,
+        marginBottom: 6,
+    },
+    ticketCriteria: {
+        fontSize: 8,
+        color: colors.textMuted,
+        marginBottom: 2,
+        paddingLeft: 6,
+    },
     criteriaItem: {
         fontSize: 9,
         marginBottom: 2,
@@ -416,6 +470,7 @@ export function LessonPlanPDF({ plan, rubric, teacherName }: LessonPlanPDFProps)
         month: "long",
         year: "numeric",
     }).format(new Date());
+    const exitTicket = plan.ticket_salida ?? buildUniversalExitTicket(plan);
 
     return (
         <Document>
@@ -555,6 +610,39 @@ export function LessonPlanPDF({ plan, rubric, teacherName }: LessonPlanPDFProps)
                             <Text key={i} style={styles.criteriaItem}>
                                 • {c}
                             </Text>
+                        ))}
+                    </View>
+                </View>
+
+                {/* Ticket de salida: Aprender a aprender */}
+                <View style={styles.section}>
+                    <View style={styles.ticketBox}>
+                        <Text style={styles.ticketTitle}>{exitTicket.titulo}</Text>
+                        <Text style={styles.ticketIntro}>
+                            {exitTicket.instrucciones} Tiempo estimado: {exitTicket.tiempo_estimado}.
+                        </Text>
+                        {exitTicket.preguntas.map((pregunta) => (
+                            <View key={pregunta.numero} style={styles.ticketQuestion}>
+                                <Text style={styles.ticketQuestionTitle}>
+                                    {pregunta.numero}. {pregunta.tipo === "evidencia" ? "Demostrar lo aprendido" : "Explicar cómo aprendí"}
+                                </Text>
+                                <Text style={styles.ticketQuestionText}>{pregunta.enunciado}</Text>
+                                <Text style={styles.ticketExpected}>
+                                    Evidencia esperada: {pregunta.evidencia_esperada}
+                                </Text>
+                            </View>
+                        ))}
+                        <View style={styles.ticketExtension}>
+                            <Text style={styles.ticketQuestionTitle}>{exitTicket.extension_visual.titulo}</Text>
+                            <Text style={styles.ticketQuestionText}>{exitTicket.extension_visual.enunciado}</Text>
+                            <Text style={styles.ticketExpected}>
+                                Opciones: {exitTicket.extension_visual.formas_equivalentes.join(" · ")}
+                            </Text>
+                            <Text style={styles.ticketExpected}>Criterio: {exitTicket.extension_visual.criterio}</Text>
+                        </View>
+                        <Text style={styles.ticketQuestionTitle}>Criterios rápidos de revisión</Text>
+                        {exitTicket.criterios_revision.map((criterio, i) => (
+                            <Text key={i} style={styles.ticketCriteria}>• {criterio}</Text>
                         ))}
                     </View>
                 </View>

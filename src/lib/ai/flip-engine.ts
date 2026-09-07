@@ -29,6 +29,7 @@ import {
 import { type ZodType } from "zod";
 import { type Rubric, rubricSchema, type Worksheet, worksheetSchema, type OAAlignment, type LearningCycle } from "./schemas";
 import { logAnalyticsEvent } from "@/lib/firebase/analytics";
+import { buildUniversalExitTicket } from "./exit-ticket";
 
 // ─── Model Configuration ─────────────────────────────────────────
 
@@ -455,6 +456,10 @@ export async function generateProjectPlan(
                 fuente_curricular: "RAG local de apoyo (validación pendiente)" as const,
                 alineacion_oas: planWithLearningCycle.alineacion_oas ?? [],
             }),
+        ticket_salida: buildUniversalExitTicket({
+            ...planWithLearningCycle,
+            nivel: input.nivel,
+        }),
     };
 
     logAnalyticsEvent({
@@ -636,7 +641,7 @@ export async function iterateProjectPlan(
     );
 
     const iteratedPlan = await generateWithFallback<ProjectPlan>(projectPlanSchema, prompt);
-    return {
+    const finalPlan = {
         ...iteratedPlan,
         nivel: currentPlan.nivel,
         asignaturas_involucradas: currentPlan.asignaturas_involucradas,
@@ -655,5 +660,9 @@ export async function iterateProjectPlan(
             evidencia_individual: currentPlan.evaluacion.evidencia_individual
                 || "Registro individual de investigación, participación argumentada, ticket de salida y explicación de los cambios incorporados en la segunda versión.",
         },
+    };
+    return {
+        ...finalPlan,
+        ticket_salida: buildUniversalExitTicket(finalPlan),
     };
 }
