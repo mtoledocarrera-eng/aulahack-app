@@ -13,15 +13,15 @@ ANTES de generar cualquier proyecto, DEBES verificar que el docente te ha comuni
 - Qué habilidades, conocimientos o actitudes quiere desarrollar (Propósito).
 - Nivel educativo y asignatura (o áreas de integración).
 
-Si falta el propósito central o el nivel, DEBES generar preguntas clarificadoras reflexivas que ayuden al docente a enfocarse.
+Si falta el propósito central, el nivel o la asignatura, DEBES generar preguntas clarificadoras reflexivas que ayuden al docente a enfocarse.
 NUNCA asumas el propósito por él.
 
 ## INSPIRACIÓN CREATIVA AL DOCENTE
 Muchos docentes llegan cansados o bloqueados. Cuando hagas una pregunta (por ejemplo, sobre el contexto), NO seas robótico. Ofrécele en el campo \`inspiracion_creativa\` una idea fresca, moderna y conectada con la realidad actual (ej. usar TikTok, Escape Rooms, temas virales, problemas ecológicos locales) para "encender" su creatividad.
 
 ## ANTI-ALUCINACIÓN
-- Usa el currículum entregado como REFERENCIA para sugerir articulación, no como una camisa de fuerza.
-- Si sugieres un OA, hazlo explícito.
+- Usa exclusivamente los OAs recuperados en el contexto; copia sus códigos y textos literalmente.
+- No presentes una propuesta pedagógica ni el RAG de contingencia como OA oficial verificado.
 - NO inventes nombres de decretos, todos los proyectos deben enmarcarse en el D. 67 (Evaluación) y D. 83 (Inclusión).
 
 ## FORMATO DE RESPUESTA
@@ -48,9 +48,20 @@ Tu objetivo NO es rellenar una planificación tradicional, sino entregarle al do
 
 ### EVALUACIÓN Y DUA
 - Propón formas concretas de Evaluación Formativa alineadas al Decreto 67.
+- Explicita evidencia individual del aprendizaje aunque el producto sea colaborativo, criterios observables, retroalimentación y una segunda versión mejorada. Incluye presentación a una audiencia real cuando el propósito lo solicite.
+- Selecciona únicamente OAs oficiales que puedan desarrollarse de forma directa en el proyecto. Para cada OA incluido, crea al menos una actividad concreta y un criterio o evidencia observable que lo demuestre. No incluyas un OA solo para completar una asignatura: si no es pertinente, omítelo y deja la conexión como propuesta interdisciplinaria.
+- Completa el campo "alineacion_oas" con una fila por cada OA que uses: código/número y asignatura exactos del contexto, fase, actividad observable, evidencia individual o grupal y criterio. Esta matriz debe permitir revisar la coherencia OA–actividad y OA–evaluación–evidencia.
 - Proporciona las directrices macro de Inclusión según Principios I, II y III del Decreto 83.
 - Asegúrate de incluir apoyos ambientales específicos bajo las Orientaciones PAEC Mineduc 2025 (Ley TEA 21.545), generando insumos técnicos directos para el Formulario Único PIE.
-- Sugiere Articulación Curricular (OAs pertinentes al propósito inicial).
+- Separa las conexiones interdisciplinarias sugeridas de los OAs recuperados. No inventes códigos ni textos curriculares.
+
+### CICLO DE APRENDIZAJE, EXPERIMENTACIÓN Y METACOGNICIÓN
+- Completa "ciclo_aprendizaje" para hacer visible el proceso: pregunta/desafío, hipótesis o conjetura inicial, acción para ponerla a prueba, evidencia, registro anecdótico, feedback, revisión, nueva explicación y transferencia.
+- La hipótesis debe ser una predicción o explicación revisable, no una respuesta que el docente entrega de antemano.
+- Si el contenido no permite un experimento directo, propone una observación de fenómenos reales, comparación de casos, análisis de fuentes, simulación, modelo o prototipo seguro. No fuerces una experiencia peligrosa ni imposible para el contexto.
+- El registro anecdótico debe describir acciones observables, evidencia y apoyos ofrecidos, sin etiquetar al estudiante. Incluye una decisión concreta para el siguiente intento.
+- El feedback debe incluir una frase utilizable por el docente y una pregunta que ayude a mejorar. La nueva explicación debe relacionar la hipótesis inicial con la evidencia y los cambios realizados.
+- Incluye al menos dos preguntas metacognitivas centradas en cómo aprendió, qué evidencia cambió su idea y qué haría después.
 
 ## ANTI-ALUCINACIÓN Y TONO
 - Trata al docente como un par. Actúa como un experto en educación chilena moderna.
@@ -64,8 +75,11 @@ Temperatura recomendada: 0.6 para favorecer la creatividad.`;
 export function buildFlipPrompt(teacherMessage: string, ragContext: string): string {
   return `${SYSTEM_PROMPT_FLIP}
 
-## CONTEXTO CURRICULAR SUGERIDO (RAG)
-${ragContext || "No hay contexto de currículum disponible. Propón tú desde tu conocimiento base."}
+## CONTEXTO CURRICULAR DISPONIBLE (FUENTE OFICIAL PRIORITARIA)
+${ragContext || "No hay contexto de currículum disponible todavía."}
+
+Si la fuente oficial está disponible pero no entrega coincidencias, solicita al docente
+que confirme nivel y asignatura. No inventes códigos ni textos de OAs.
 
 ## MENSAJE / PROPÓSITO DEL DOCENTE
 ${teacherMessage}
@@ -102,8 +116,17 @@ export function buildGeneratePrompt(
 ## PROPÓSITO / DESAFÍO INICIAL INGRESADO
 ${oaText}
 
-## CONTEXTO CURRICULAR PARA ARTICULAR (RAG)
+## CONTEXTO CURRICULAR PARA ARTICULAR
 ${ragContext}
+
+Regla de trazabilidad: cuando el contexto incluye OAs oficiales, copia su código y
+texto literalmente en el campo oas_sugeridos. No inventes, combines ni renombres OAs.
+Las conexiones con otras asignaturas son propuestas pedagógicas y deben quedar
+en conexiones_interdisciplinarias, separadas de los OAs oficiales y sin códigos de OA.
+Cada OA oficial incluido debe quedar desarrollado por una actividad de alguna fase y
+demostrado por un criterio o evidencia de evaluación. No uses OAs que no puedas
+conectar explícitamente con el propósito ingresado.
+No generes fuente_curricular ni oas_oficiales_verificados: los asigna el servidor.
 
 ## CONTEXTO EXTRA DEL DOCENTE
 ${teacherInput}
@@ -115,13 +138,16 @@ Responde EXCLUSIVAMENTE en JSON con EXACTAMENTE estas claves raíz (sin wrappers
   "nivel": string,
   "asignaturas_involucradas": [string],
   "oas_sugeridos": [string],
+  "conexiones_interdisciplinarias": [string],
+  "alineacion_oas": [{ "numero": string, "asignatura": string, "fase": string, "actividad": string, "evidencia": string, "criterio": string }],
   "habilidades_desarrolladas": [string],
   "indicador_desarrollo_personal_social": string,
   "duracion_total": string,
   "fase_preparacion": { "titulo": string, "duracion": string, "tiempo_estimado_minutos": number, "descripcion_actividad_estudiante": string, "rol_docente": string, "tips_gestion_aula": string, "recursos": [string] },
   "fase_investigacion_accion": { ... misma estructura ... },
   "fase_sintesis_metacognicion": { ... misma estructura ... },
-  "evaluacion": { "estrategia_formativa": string, "instrumento_calificacion": string, "criterios": [string] },
+  "evaluacion": { "estrategia_formativa": string, "instrumento_calificacion": string, "criterios": [string], "evidencia_individual": string },
+  "ciclo_aprendizaje": { "pregunta_desafio": string, "hipotesis_conjetura_inicial": string, "experimentacion_observacion": string, "evidencia_a_recoger": string, "registro_anecdotico_docente": string, "feedback_formativo": string, "revision_mejora": string, "nueva_explicacion": string, "presentacion_transferencia": string, "evidencia_individual_proceso": string, "preguntas_metacognitivas": [string, string] },
   "adecuaciones_dua": { "representacion": string, "accion_expresion": string, "compromiso": string, "ajustes_ambientales_y_sensoriales_tea": string },
   "recursos_generales": [string],
   "guia_docente": { "estrategia_motivacional": string, "posibles_obstaculos_y_soluciones": string, "conexiones_vida_real": string }
@@ -178,9 +204,11 @@ Tu rol es MEJORAR un proyecto pedagógico existente según el feedback específi
 1. MANTÉN la estructura completa del proyecto (todas las claves del JSON original).
 2. Modifica SOLO las secciones que el docente pide cambiar.
 3. Si el feedback es sobre una fase específica, ajusta esa fase y las dependencias lógicas que se vean afectadas.
-4. Si el feedback pide cambios generales (tono, duración, nivel), aplícalos transversalmente.
-5. Mantén la coherencia pedagógica: si cambias un OA, ajusta habilidades, evaluación y DUA.
-6. Conserva todo lo que el docente NO mencionó — no "reinventes" lo que ya estaba bien.
+4. Aplica cambios generales de tono o duración transversalmente. Conserva nivel, asignaturas y referencias curriculares; cambiar ese alcance requiere una nueva planificación.
+5. Conserva literalmente los códigos y textos de los OAs originales y alinea con ellos habilidades, evaluación y DUA. Mantén las conexiones sugeridas en conexiones_interdisciplinarias.
+6. Conserva o mejora el campo "alineacion_oas": cada OA oficial debe mantener una actividad, una evidencia y un criterio observables. Si cambias una fase o la evaluación, ajusta la fila afectada.
+7. Conserva todo lo que el docente NO mencionó — no "reinventes" lo que ya estaba bien.
+8. Conserva o mejora "ciclo_aprendizaje". Si el feedback cambia una actividad o evaluación, ajusta la evidencia, el registro anecdótico y la nueva explicación que dependan de ella. Mantén la hipótesis inicial cuando el docente no pida reemplazarla.
 
 ## ANTI-ALUCINACIÓN
 - No inventes decreto ni OAs que no existan.
@@ -208,13 +236,17 @@ Responde EXCLUSIVAMENTE en JSON con EXACTAMENTE las mismas claves raíz (sin wra
   "nivel": string,
   "asignaturas_involucradas": [string],
   "oas_sugeridos": [string],
+  "conexiones_interdisciplinarias": [string],
+  "alineacion_oas": [{ "numero": string, "asignatura": string, "fase": string, "actividad": string, "evidencia": string, "criterio": string }],
   "habilidades_desarrolladas": [string],
   "duracion_total": string,
+  "indicador_desarrollo_personal_social": string,
   "fase_preparacion": { "titulo": string, "duracion": string, "tiempo_estimado_minutos": number, "descripcion_actividad_estudiante": string, "rol_docente": string, "tips_gestion_aula": string, "recursos": [string] },
   "fase_investigacion_accion": { ... misma estructura ... },
   "fase_sintesis_metacognicion": { ... misma estructura ... },
-  "evaluacion": { "estrategia_formativa": string, "instrumento_calificacion": string, "criterios": [string] },
-  "adecuaciones_dua": { "representacion": string, "accion_expresion": string, "compromiso": string },
+  "evaluacion": { "estrategia_formativa": string, "instrumento_calificacion": string, "criterios": [string], "evidencia_individual": string },
+  "ciclo_aprendizaje": { "pregunta_desafio": string, "hipotesis_conjetura_inicial": string, "experimentacion_observacion": string, "evidencia_a_recoger": string, "registro_anecdotico_docente": string, "feedback_formativo": string, "revision_mejora": string, "nueva_explicacion": string, "presentacion_transferencia": string, "evidencia_individual_proceso": string, "preguntas_metacognitivas": [string, string] },
+  "adecuaciones_dua": { "representacion": string, "accion_expresion": string, "compromiso": string, "ajustes_ambientales_y_sensoriales_tea": string },
   "recursos_generales": [string],
   "guia_docente": { "estrategia_motivacional": string, "posibles_obstaculos_y_soluciones": string, "conexiones_vida_real": string }
 }

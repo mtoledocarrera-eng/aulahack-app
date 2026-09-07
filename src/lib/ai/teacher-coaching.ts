@@ -145,6 +145,24 @@ const MODEL_CASCADE = [
     process.env.AI_MODEL_FALLBACK || "gemini-3-flash-preview",
 ];
 
+const THINKING_LEVELS = ["low", "medium", "high"] as const;
+type ThinkingLevel = typeof THINKING_LEVELS[number];
+
+function buildCoachingGenerationConfig(modelName: string): Record<string, unknown> {
+    const isGemini3Model = /^gemini-3(?:[.-]|$)/i.test(modelName);
+    const requestedLevel = process.env.AI_THINKING_LEVEL;
+    const thinkingLevel: ThinkingLevel = THINKING_LEVELS.includes(requestedLevel as ThinkingLevel)
+        ? requestedLevel as ThinkingLevel
+        : "low";
+
+    return {
+        responseMimeType: "application/json",
+        ...(isGemini3Model
+            ? { thinkingConfig: { thinkingLevel } }
+            : { temperature: 0.8 }),
+    };
+}
+
 const COACHING_PROMPT = `Eres un Mentor Senior de Desarrollo Profesional Docente en Chile.
 Tienes AÑOS de experiencia acompañando profesores con sutileza, respeto y criterio técnico.
 
@@ -213,10 +231,7 @@ Responde EXCLUSIVAMENTE en JSON (sin wrappers):
         try {
             const model = google.getGenerativeModel({
                 model: modelName,
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    temperature: 0.8,
-                },
+                generationConfig: buildCoachingGenerationConfig(modelName),
             });
             const result = await model.generateContent(prompt);
             const text = result.response.text();

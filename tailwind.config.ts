@@ -91,12 +91,12 @@ const config: Config = {
 			},
 			fontFamily: {
 				sans: [
-					'var(--font-inter)',
+					'var(--font-inter, system-ui)',
 					'system-ui',
 					'sans-serif'
 				],
 				display: [
-					'var(--font-outfit)',
+					'var(--font-outfit, system-ui)',
 					'system-ui',
 					'sans-serif'
 				]

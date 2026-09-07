@@ -1,18 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({
-    subsets: ["latin"],
-    variable: "--font-inter",
-    display: "swap",
-});
-
-const outfit = Outfit({
-    subsets: ["latin"],
-    variable: "--font-outfit",
-    display: "swap",
-});
 
 export const metadata: Metadata = {
     title: "AulaHack — Planificador Pedagógico con IA",
@@ -60,7 +47,7 @@ export default function RootLayout({
     return (
         <html lang="es-CL" suppressHydrationWarning>
             <body
-                className={`${inter.variable} ${outfit.variable} font-sans min-h-screen`}
+                className="font-sans min-h-screen"
             >
                 <ThemeProvider>
                     <AuthProvider>

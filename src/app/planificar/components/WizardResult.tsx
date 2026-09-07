@@ -12,7 +12,7 @@ const GradingMatrix = dynamic(() => import("@/components/GradingMatrix").then(mo
     loading: () => <div className="p-8 text-center text-muted-foreground animate-pulse">Cargando matriz de calificación...</div>
 });
 
-import type { ProjectPlan, Rubric, Worksheet } from "@/lib/ai/schemas";
+import type { ProjectPlan, Rubric, Worksheet, LearningCycle } from "@/lib/ai/schemas";
 
 interface WizardResultProps {
     uid: string;
@@ -63,11 +63,45 @@ export function WizardResult({
                 </div>
 
                 <div className="p-4 rounded-xl bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 mb-6">
-                    <p className="text-sm font-medium text-brand-700 dark:text-brand-300 mb-1">OAs Sugeridos (Alineación Curricular)</p>
+                    <p className="text-sm font-medium text-brand-700 dark:text-brand-300 mb-1">{projectPlan.fuente_curricular === "Firestore oficial" ? "OAs oficiales recuperados" : "Referencias curriculares por validar"}</p>
+                    {projectPlan.fuente_curricular && (
+                        <p className="text-xs text-muted-foreground mb-2">
+                            {projectPlan.fuente_curricular === "Firestore oficial"
+                                ? "Fuente: objetivos oficiales verificados en Firestore."
+                                : "Fuente: RAG local de apoyo; validar con el currículum antes de usar."}
+                        </p>
+                    )}
                     <ul className="list-disc list-inside text-sm space-y-1">
                         {projectPlan.oas_sugeridos.map((oa, i) => <li key={i}>{oa}</li>)}
                     </ul>
                 </div>
+
+                {!!projectPlan.conexiones_interdisciplinarias?.length && (
+                    <div className="p-4 rounded-xl bg-muted/50 border border-border mb-6">
+                        <p className="text-sm font-medium mb-2">Conexiones interdisciplinarias sugeridas (propuesta pedagógica)</p>
+                        <ul className="list-disc list-inside text-sm space-y-1">
+                            {projectPlan.conexiones_interdisciplinarias.map((connection, i) => <li key={i}>{connection}</li>)}
+                        </ul>
+                    </div>
+                )}
+
+                {!!projectPlan.alineacion_oas?.length && (
+                    <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/10 mb-6">
+                        <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300 mb-1">Coherencia OA–actividad–evaluación–evidencia</p>
+                        <p className="text-xs text-muted-foreground mb-3">Matriz de revisión: cada OA se vincula con una acción observable, una evidencia y un criterio.</p>
+                        <div className="space-y-3">
+                            {projectPlan.alineacion_oas.map((alignment, i) => (
+                                <div key={`${alignment.numero}-${alignment.asignatura}-${i}`} className="rounded-lg border border-emerald-200/70 dark:border-emerald-800/70 bg-background/70 p-3 text-sm">
+                                    <p className="font-semibold">{/^\d+$/.test(alignment.numero) ? `OA ${alignment.numero}` : alignment.numero} · {alignment.asignatura}</p>
+                                    <p className="text-xs text-muted-foreground mt-1"><strong>Fase:</strong> {alignment.fase}</p>
+                                    <p className="mt-1"><strong>Actividad:</strong> {alignment.actividad}</p>
+                                    <p className="mt-1"><strong>Evidencia:</strong> {alignment.evidencia}</p>
+                                    <p className="mt-1"><strong>Criterio:</strong> {alignment.criterio}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="p-4 rounded-xl bg-muted/50 border border-border mb-6">
                     <p className="text-sm font-medium mb-1">Habilidades a Desarrollar:</p>
@@ -89,6 +123,10 @@ export function WizardResult({
                     <ProjectPhaseCard step={2} title="Investigación y Acción" data={projectPlan.fase_investigacion_accion} />
                     <ProjectPhaseCard step={3} title="Síntesis y Metacognición" data={projectPlan.fase_sintesis_metacognicion} />
 
+                    {projectPlan.ciclo_aprendizaje && (
+                        <LearningCycleCard cycle={projectPlan.ciclo_aprendizaje} />
+                    )}
+
                     <div className="p-6 rounded-xl border border-border/50 bg-muted/30">
                         <div className="flex items-center gap-3 mb-3">
                             <span className="step-indicator active">4</span>
@@ -96,6 +134,9 @@ export function WizardResult({
                         </div>
                         <p className="text-sm mb-2"><strong>Evaluación Formativa (Proceso):</strong> {projectPlan.evaluacion.estrategia_formativa}</p>
                         <p className="text-sm mb-2"><strong>Instrumento Final:</strong> {projectPlan.evaluacion.instrumento_calificacion}</p>
+                        {projectPlan.evaluacion.evidencia_individual && (
+                            <p className="text-sm mb-2"><strong>Evidencia individual:</strong> {projectPlan.evaluacion.evidencia_individual}</p>
+                        )}
                         <div>
                             <p className="text-sm font-medium mb-1">Criterios Clave:</p>
                             <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
@@ -310,6 +351,50 @@ export function WizardResult({
                 >
                     {isExporting ? <><Loader2 className="mr-2 w-5 h-5 animate-spin" /> Generando PDF...</> : <><Download className="mr-2 w-5 h-5" /> Exportar PDF</>}
                 </Button>
+            </div>
+        </div>
+    );
+}
+
+function LearningCycleCard({ cycle }: { cycle: LearningCycle }) {
+    const steps = [
+        ["1. Pregunta o desafío", cycle.pregunta_desafio],
+        ["2. Hipótesis o conjetura inicial", cycle.hipotesis_conjetura_inicial],
+        ["3. Experimentación u observación", cycle.experimentacion_observacion],
+        ["4. Evidencia a recoger", cycle.evidencia_a_recoger],
+        ["5. Registro anecdótico docente", cycle.registro_anecdotico_docente],
+        ["6. Feedback formativo", cycle.feedback_formativo],
+        ["7. Revisión y mejora", cycle.revision_mejora],
+        ["8. Nueva explicación", cycle.nueva_explicacion],
+        ["9. Presentación o transferencia", cycle.presentacion_transferencia],
+    ] as const;
+
+    return (
+        <div className="p-6 rounded-xl border-2 border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-900/10">
+            <div className="flex items-center gap-3 mb-2">
+                <span className="step-indicator bg-violet-600 text-white">↻</span>
+                <h3 className="font-bold text-lg text-violet-900 dark:text-violet-100">Ciclo de aprender haciendo</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">
+                Esta secuencia permite observar cómo evoluciona la comprensión, sin confundir el producto grupal con el aprendizaje individual.
+            </p>
+            <div className="grid md:grid-cols-2 gap-3">
+                {steps.map(([label, value]) => (
+                    <div key={label} className="rounded-lg border border-violet-200/80 dark:border-violet-800/80 bg-background/70 p-3">
+                        <p className="text-xs font-bold text-violet-700 dark:text-violet-300 mb-1">{label}</p>
+                        <p className="text-sm text-muted-foreground">{value}</p>
+                    </div>
+                ))}
+            </div>
+            <div className="mt-3 rounded-lg border border-violet-200/80 dark:border-violet-800/80 bg-background/70 p-3">
+                <p className="text-xs font-bold text-violet-700 dark:text-violet-300 mb-1">Evidencia individual del proceso</p>
+                <p className="text-sm text-muted-foreground">{cycle.evidencia_individual_proceso}</p>
+            </div>
+            <div className="mt-3 rounded-lg border border-violet-200/80 dark:border-violet-800/80 bg-background/70 p-3">
+                <p className="text-xs font-bold text-violet-700 dark:text-violet-300 mb-1">Preguntas metacognitivas</p>
+                <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                    {cycle.preguntas_metacognitivas.map((question, index) => <li key={index}>{question}</li>)}
+                </ul>
             </div>
         </div>
     );

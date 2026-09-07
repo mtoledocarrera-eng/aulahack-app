@@ -153,6 +153,9 @@ export function useLessonWizard(user: any) {
             }
 
             setStep("result");
+            // Evita conservar un error transitorio de un intento anterior
+            // cuando la planificación finalmente se generó correctamente.
+            setError(null);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Error desconocido");
             setStep("input");

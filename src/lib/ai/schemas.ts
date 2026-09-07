@@ -74,13 +74,57 @@ export const evaluationSchema = z.object({
     estrategia_formativa: z.string().describe("Cómo se monitorea y retroalimenta el proceso (Dec. 67)"),
     instrumento_calificacion: z.string().describe("Instrumento sugerido para la calificación final (ej. rúbrica cocreada)"),
     criterios: z.array(z.string()).describe("Criterios de evaluación clave"),
+    evidencia_individual: z.string().optional().describe("Evidencia individual verificable del aprendizaje, aunque el producto sea colaborativo"),
+});
+
+/**
+ * Ciclo de aprendizaje haciendo visible cómo una idea inicial se contrasta,
+ * se documenta y se mejora. Es opcional para poder abrir planes históricos,
+ * pero las nuevas generaciones deben completarlo.
+ */
+export const learningCycleSchema = z.object({
+    pregunta_desafio: z.string().describe("Pregunta o desafío auténtico que orienta la experiencia"),
+    hipotesis_conjetura_inicial: z.string().describe("Predicción o explicación inicial que el estudiante formula antes de actuar"),
+    experimentacion_observacion: z.string().describe("Acción, experimento, observación, comparación, simulación o prototipo que permite poner a prueba la hipótesis"),
+    evidencia_a_recoger: z.string().describe("Qué se observará, registrará o producirá para saber cómo evoluciona la explicación"),
+    registro_anecdotico_docente: z.string().describe("Guía de registro breve con fecha, acción observable, evidencia, apoyo ofrecido y siguiente paso; sin etiquetas"),
+    feedback_formativo: z.string().describe("Retroalimentación concreta y pregunta que orientan el siguiente intento"),
+    revision_mejora: z.string().describe("Cómo se revisa la estrategia o el producto después del feedback"),
+    nueva_explicacion: z.string().describe("Explicación final que conecta la hipótesis inicial, la evidencia y los cambios realizados"),
+    presentacion_transferencia: z.string().describe("Cómo se comunica o transfiere lo aprendido a una audiencia o situación real"),
+    evidencia_individual_proceso: z.string().describe("Evidencia individual del proceso aunque la producción sea colaborativa"),
+    preguntas_metacognitivas: z.array(z.string()).min(2).max(4).describe("Preguntas para que el estudiante explique cómo aprendió y qué mejoró"),
+});
+
+export const officialOAReferenceSchema = z.object({
+    id: z.string(),
+    numero: z.string(),
+    descripcion: z.string(),
+    asignatura: z.string(),
+    curso: z.string(),
+    eje: z.string().optional(),
+    es_basal: z.boolean().optional(),
+});
+
+/** Trazabilidad pedagógica de cada OA: actividad, evidencia y criterio. */
+export const oaAlignmentSchema = z.object({
+    numero: z.string().describe("Código o número exacto del OA recuperado"),
+    asignatura: z.string().describe("Asignatura exacta del OA recuperado"),
+    fase: z.string().describe("Fase en la que se desarrolla la actividad"),
+    actividad: z.string().describe("Actividad observable que desarrolla este OA"),
+    evidencia: z.string().describe("Evidencia que permitirá observar el aprendizaje de este OA"),
+    criterio: z.string().describe("Criterio que se utilizará para interpretar la evidencia"),
 });
 
 export const projectPlanSchema = z.object({
     titulo: z.string().describe("Título motivador del proyecto o experiencia de aprendizaje"),
     nivel: z.string().describe("Nivel educativo inferido o confirmado"),
     asignaturas_involucradas: z.array(z.string()).describe("Asignaturas que podrían integrarse en este ABP"),
-    oas_sugeridos: z.array(z.string()).describe("OAs sugeridos del currículum oficial (ej. 'OA 1 (Ciencias): Analizar...')"),
+    oas_sugeridos: z.array(z.string()).describe("Referencias curriculares recuperadas; su procedencia se indica en fuente_curricular"),
+    conexiones_interdisciplinarias: z.array(z.string()).optional().describe("Propuestas pedagógicas de articulación, separadas de los OAs oficiales; sin inventar códigos"),
+    oas_oficiales_verificados: z.array(officialOAReferenceSchema).optional().describe("OAs copiados desde objetivos_aprendizaje de Firestore"),
+    fuente_curricular: z.enum(["Firestore oficial", "RAG local de apoyo (validación pendiente)"]).optional(),
+    alineacion_oas: z.array(oaAlignmentSchema).optional().describe("Relación explícita entre cada OA, actividad, evidencia y criterio"),
     habilidades_desarrolladas: z.array(z.string()).describe("Habilidades siglo XXI o específicas a desarrollar"),
     indicador_desarrollo_personal_social: z.string().describe("Cruce con IDPS (Ej: Autoestima Académica, Clima de Convivencia Escolar, Hábitos de Vida Saludable o Participación y Formación Ciudadana)."),
     duracion_total: z.string().describe("Duración total estimada del proyecto"),
@@ -91,6 +135,7 @@ export const projectPlanSchema = z.object({
     fase_sintesis_metacognicion: projectPhaseSchema.describe("Fase 3: Cierre, producto final y reflexión metacognitiva"),
 
     evaluacion: evaluationSchema.describe("Estrategia de evaluación según Decreto 67"),
+    ciclo_aprendizaje: learningCycleSchema.optional().describe("Secuencia hipótesis, acción, evidencia, registro, feedback, revisión y nueva explicación"),
     adecuaciones_dua: duaAdaptationSchema.describe("Adecuaciones macro del proyecto según Decreto 83"),
 
     // Metadata & Apoyo al Docente
@@ -112,6 +157,8 @@ export const teacherInputSchema = z.object({
 
 export type TeacherInput = z.infer<typeof teacherInputSchema>;
 export type ProjectPlan = z.infer<typeof projectPlanSchema>;
+export type OAAlignment = z.infer<typeof oaAlignmentSchema>;
+export type LearningCycle = z.infer<typeof learningCycleSchema>;
 
 // ─── Rúbrica de Evaluación ──────────────────────────────────────
 export const rubricLevelSchema = z.object({

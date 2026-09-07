@@ -20,8 +20,14 @@ import {
 } from "./schemas";
 import { buildFlipPrompt, buildGeneratePrompt, buildRubricPrompt, buildIteratePrompt, buildWorksheetPrompt } from "./prompts";
 import { searchCurriculum } from "@/lib/rag";
+import {
+    searchOfficialCurriculum,
+    formatOfficialOA,
+    verifyOfficialReferences,
+    type OfficialCurriculumEntry,
+} from "@/lib/rag/official-firestore";
 import { type ZodType } from "zod";
-import { type Rubric, rubricSchema, type Worksheet, worksheetSchema } from "./schemas";
+import { type Rubric, rubricSchema, type Worksheet, worksheetSchema, type OAAlignment, type LearningCycle } from "./schemas";
 import { logAnalyticsEvent } from "@/lib/firebase/analytics";
 
 // ─── Model Configuration ─────────────────────────────────────────
@@ -37,6 +43,8 @@ const MODEL_CASCADE = [
 ];
 
 const MAX_HEAL_RETRIES = 1;
+const THINKING_LEVELS = ["low", "medium", "high"] as const;
+type ThinkingLevel = typeof THINKING_LEVELS[number];
 
 // ─── Custom Error Types ──────────────────────────────────────────
 
@@ -173,20 +181,11 @@ async function callModel<T>(
     schema: ZodType<T>,
     prompt: string,
 ): Promise<T> {
-    // Gemini 2.5+ tiene "thinking" habilitado por defecto,
-    // lo que antepone tokens de razonamiento al JSON y lo rompe.
-    // Desactivamos thinking (budget=0) para salidas estructuradas.
-    // gemini-2.5-flash-lite NO soporta thinkingConfig, se excluye.
-    const isThinkingModel = modelName.includes("2.5") && !modelName.includes("lite");
+    const generationConfig = buildGenerationConfig(modelName);
 
     const model = google.getGenerativeModel({
         model: modelName,
-        generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 8192,
-            responseMimeType: "application/json",
-            ...(isThinkingModel ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
-        } as Record<string, unknown>,
+        generationConfig,
     });
 
     // Primer intento
@@ -317,16 +316,36 @@ function extractJSON(text: string): string | null {
 export async function analyzeTeacherInput(
     input: TeacherInput
 ): Promise<FlipResponse> {
+    const missing = (["nivel", "asignatura"] as const).filter((field) => !input[field]?.trim());
+    if (missing.length) {
+        return {
+            needsMoreInfo: true,
+            readyToGenerate: false,
+            summary: "Falta definir nivel y/o asignatura para consultar el currículum.",
+            questions: missing.map((field) => ({
+                field, required: true,
+                question: field === "nivel" ? "¿Para qué nivel educativo planificamos?" : "¿Qué asignaturas participarán?",
+            })),
+        };
+    }
     let ragContext = "";
     if (input.nivel && input.asignatura && input.proposito) {
-        const ragResult = await searchCurriculum(
+        const officialResult = await searchOfficialCurriculum(
             input.nivel,
             input.asignatura,
             input.proposito
         );
-        ragContext = ragResult.entries
-            .map((e) => `[${e.oa}] ${e.descripcion}`)
-            .join("\n");
+        if (officialResult.available) {
+            if (!officialResult.entries.length) {
+                throw new AIGenerationError("No encontré OAs oficiales para todas las asignaturas de ese nivel. Confirma los datos o completa la cobertura curricular.", 422);
+            }
+            ragContext = "Fuente: Firestore oficial.\n" + officialResult.entries.map(formatOfficialOA).join("\n");
+        } else {
+            const ragResult = await searchCurriculum(input.nivel, input.asignatura, input.proposito);
+            ragContext = "Fuente: RAG local de apoyo (validación pendiente). No son OAs verificados en Firestore.\n" + ragResult.entries
+                .map((e) => `[${e.oa}] ${e.descripcion}`)
+                .join("\n");
+        }
     }
 
     const teacherMessage = buildTeacherMessage(input);
@@ -348,35 +367,51 @@ export async function analyzeTeacherInput(
 export async function generateProjectPlan(
     input: TeacherInput
 ): Promise<ProjectPlan> {
-    if (!input.proposito) {
+    if (!input.proposito?.trim()) {
         throw new AIGenerationError(
             "Flip Prompting no completado: falta definir el propósito de aprendizaje.",
             422
         );
     }
 
-    // Buscamos semánticamente el RAG apoyado solo si nos dan nivel y asignatura.
-    // Si no, la búsqueda probablemente retorne vacío y usamos adaptación.
-    const ragResult = await searchCurriculum(
-        input.nivel || "",
-        input.asignatura || "",
+    if (!input.nivel?.trim() || !input.asignatura?.trim()) {
+        throw new AIGenerationError(
+            "Para vincular la planificación con el currículum oficial debes indicar nivel y asignatura.",
+            422
+        );
+    }
+
+    const officialResult = await searchOfficialCurriculum(
+        input.nivel,
+        input.asignatura,
         input.proposito
     );
-
-    let primaryOA;
+    let officialEntries: OfficialCurriculumEntry[] | null = null;
+    let localOAs: string[] = [];
     let ragContext = "";
 
-    if (ragResult.entries.length === 0) {
-        // En lugar de lanzar error 404, construimos un OA "virtual" con el input del usuario
-        // y le damos la orden a la IA de que se adapte.
-        primaryOA = {
-            oa: 'Propósito General / ABP',
-            descripcion: input.proposito
-        };
-        ragContext = "No se encontraron coincidencias exactas en la base curricular para el término ingresado. Como experto Mentor Pedagógico, adapta este propósito al nivel del estudiante y construye un proyecto (ABP) completo que conecte con sus necesidades y habilidades a desarrollar.";
+    if (officialResult.available) {
+        if (officialResult.entries.length === 0) {
+            throw new AIGenerationError(
+                "No encontré OAs oficiales para todas las asignaturas de ese nivel. Confirma los datos o completa la cobertura curricular.",
+                422
+            );
+        }
+        officialEntries = officialResult.entries;
+        ragContext = officialEntries
+            .map((e) => `${formatOfficialOA(e)}\nEje: ${e.eje ?? "No informado"}${e.es_basal === undefined ? "" : `\nPriorización: ${e.es_basal ? "Basal" : "Complementario"}`}`)
+            .join("\n\n");
     } else {
-        primaryOA = ragResult.entries[0];
-        ragContext = ragResult.entries
+        // El RAG local solo opera como contingencia si Firestore no está disponible.
+        const ragResult = await searchCurriculum(input.nivel, input.asignatura, input.proposito);
+        if (ragResult.entries.length === 0) {
+            throw new AIGenerationError(
+                "No fue posible consultar la fuente curricular oficial y el RAG local no tiene coincidencias. Intenta nuevamente o confirma los datos.",
+                503
+            );
+        }
+        localOAs = ragResult.entries.map((entry) => `${entry.oa} (${entry.asignatura}): ${entry.descripcion}`);
+        ragContext = `Fuente de contingencia: ${ragResult.source}. La alineación debe validarse antes de usarla como OA oficial.\n\n` + ragResult.entries
             .map(
                 (e) =>
                     `[${e.oa}] ${e.descripcion}\nIndicadores: ${e.indicadores.join("; ")}`
@@ -388,10 +423,39 @@ export async function generateProjectPlan(
     const prompt = buildGeneratePrompt(
         teacherMessage,
         ragContext,
-        `${primaryOA.oa}: ${primaryOA.descripcion}`
+        input.proposito
     );
 
     const plan = await generateWithFallback<ProjectPlan>(projectPlanSchema, prompt);
+    const evidenceIndividual = plan.evaluacion.evidencia_individual?.trim()
+        || "Registro individual de investigación, participación argumentada, ticket de salida y explicación de los cambios incorporados en la segunda versión.";
+    const planWithEvidence = {
+        ...plan,
+        evaluacion: {
+            ...plan.evaluacion,
+            evidencia_individual: evidenceIndividual,
+        },
+    };
+    const planWithLearningCycle = ensureLearningCycle(planWithEvidence);
+    const enrichedPlan = {
+        ...planWithLearningCycle,
+        nivel: input.nivel,
+        evaluacion: planWithLearningCycle.evaluacion,
+        oas_sugeridos: officialEntries
+            ? officialEntries.map(formatOfficialOA)
+            : localOAs,
+        ...(officialEntries
+            ? {
+                oas_oficiales_verificados: officialEntries,
+                fuente_curricular: "Firestore oficial" as const,
+                alineacion_oas: buildOfficialAlignments(officialEntries, planWithLearningCycle),
+            }
+            : {
+                oas_oficiales_verificados: [],
+                fuente_curricular: "RAG local de apoyo (validación pendiente)" as const,
+                alineacion_oas: planWithLearningCycle.alineacion_oas ?? [],
+            }),
+    };
 
     logAnalyticsEvent({
         type: "plan_generated",
@@ -399,7 +463,7 @@ export async function generateProjectPlan(
         metadata: { subject: input.asignatura || "N/A", level: input.nivel || "N/A" }
     }).catch(console.error);
 
-    return plan;
+    return projectPlanSchema.parse(enrichedPlan);
 }
 
 // ─── Generación de Rúbrica ────────────────────────────────────────
@@ -445,6 +509,93 @@ function buildTeacherMessage(input: TeacherInput): string {
     return parts.join("\n");
 }
 
+function buildOfficialAlignments(
+    entries: OfficialCurriculumEntry[],
+    plan: ProjectPlan,
+): OAAlignment[] {
+    const generated = plan.alineacion_oas ?? [];
+    const fallbackActivity = plan.fase_investigacion_accion.descripcion_actividad_estudiante;
+    const fallbackEvidence = plan.evaluacion.evidencia_individual
+        || plan.evaluacion.estrategia_formativa;
+    const fallbackCriterion = plan.evaluacion.criterios[0]
+        || "Explica el aprendizaje usando la evidencia recogida y justifica sus decisiones.";
+
+    return entries.map((entry) => {
+        const match = generated.find((alignment) =>
+            alignment.numero.trim() === entry.numero.trim()
+            && alignment.asignatura.trim().toLocaleLowerCase() === entry.asignatura.trim().toLocaleLowerCase()
+        );
+        return {
+            numero: entry.numero,
+            asignatura: entry.asignatura,
+            fase: match?.fase?.trim() || "Investigación y acción",
+            actividad: match?.actividad?.trim() || fallbackActivity,
+            evidencia: match?.evidencia?.trim() || fallbackEvidence,
+            criterio: match?.criterio?.trim() || fallbackCriterion,
+        };
+    });
+}
+
+/**
+ * Configuración compatible con la API legacy para comparar modelos sin
+ * cambiar el contrato de salida de la aplicación.
+ *
+ * Gemini 2.5 usa thinkingBudget; Gemini 3.x usa thinkingLevel y no debe
+ * recibir temperature. El nivel experimental se puede controlar con
+ * AI_THINKING_LEVEL=low|medium|high, con low como valor seguro por defecto.
+ */
+export function buildGenerationConfig(modelName: string): Record<string, unknown> {
+    const isGemini3Model = /^gemini-3(?:[.-]|$)/i.test(modelName);
+    const isThinkingModel = modelName.includes("2.5") && !modelName.includes("lite");
+    const requestedLevel = process.env.AI_THINKING_LEVEL;
+    const thinkingLevel: ThinkingLevel = THINKING_LEVELS.includes(requestedLevel as ThinkingLevel)
+        ? requestedLevel as ThinkingLevel
+        : "low";
+
+    return {
+        maxOutputTokens: 8192,
+        responseMimeType: "application/json",
+        ...(isGemini3Model
+            ? { thinkingConfig: { thinkingLevel } }
+            : {
+                temperature: 0.3,
+                ...(isThinkingModel ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+            }),
+    };
+}
+
+/**
+ * Garantiza que las planificaciones nuevas y las históricas puedan mostrar
+ * el ciclo de aprender haciendo, incluso si un modelo antiguo no lo entregó.
+ * Los textos de respaldo son guías operativas, no OAs ni resultados atribuidos
+ * al estudiante.
+ */
+export function ensureLearningCycle(plan: ProjectPlan): ProjectPlan {
+    if (plan.ciclo_aprendizaje) return plan;
+
+    const evidence = plan.evaluacion.evidencia_individual
+        || plan.evaluacion.estrategia_formativa
+        || "Producto, explicación y registro del proceso.";
+    const ciclo: LearningCycle = {
+        pregunta_desafio: `¿Qué necesitamos comprender o mejorar para responder al desafío «${plan.titulo}»?`,
+        hipotesis_conjetura_inicial: "Antes de actuar, cada estudiante formula una predicción o explicación inicial y señala en qué se basa.",
+        experimentacion_observacion: plan.fase_investigacion_accion.descripcion_actividad_estudiante,
+        evidencia_a_recoger: `${evidence} Registra datos, decisiones, dificultades y cambios observables.`,
+        registro_anecdotico_docente: "Anota fecha y situación, acción observable del estudiante, evidencia producida, apoyo ofrecido y siguiente paso; describe lo que ocurrió sin etiquetar.",
+        feedback_formativo: `${plan.evaluacion.estrategia_formativa} Pregunta: «¿Qué evidencia respalda tu explicación y qué podrías probar ahora?»`,
+        revision_mejora: "Después del feedback, cada estudiante compara su primera estrategia con la nueva, explica qué cambió y realiza un segundo intento.",
+        nueva_explicacion: `${plan.fase_sintesis_metacognicion.descripcion_actividad_estudiante} La explicación final debe conectar la hipótesis, la evidencia y la mejora realizada.`,
+        presentacion_transferencia: "Comunica la explicación y la evidencia a una audiencia real o a otra situación, usando el medio que mejor permita demostrar lo aprendido.",
+        evidencia_individual_proceso: `${evidence} Incluye la hipótesis inicial, una decisión personal, la respuesta al feedback y la nueva explicación.`,
+        preguntas_metacognitivas: [
+            "¿Qué pensaba al comenzar y qué evidencia hizo cambiar o confirmar mi idea?",
+            "¿Qué mejoré después del feedback y qué probaría en un próximo intento?",
+        ],
+    };
+
+    return { ...plan, ciclo_aprendizaje: ciclo };
+}
+
 // ─── Iteración de Planes ──────────────────────────────────────────
 
 /**
@@ -465,10 +616,44 @@ export async function iterateProjectPlan(
         );
     }
 
+    let verified: OfficialCurriculumEntry[] = [];
+    if (currentPlan.fuente_curricular === "Firestore oficial") {
+        const references = await verifyOfficialReferences(currentPlan.oas_oficiales_verificados ?? []);
+        if (!references) {
+            throw new AIGenerationError("No fue posible revalidar los OAs originales en Firestore. Intenta nuevamente o genera una nueva planificación.", 503);
+        }
+        verified = references;
+    }
+    const groundedPlan = ensureLearningCycle({
+        ...currentPlan,
+        oas_oficiales_verificados: verified,
+        oas_sugeridos: verified.length ? verified.map(formatOfficialOA) : currentPlan.oas_sugeridos,
+    });
+
     const prompt = buildIteratePrompt(
-        JSON.stringify(currentPlan, null, 2),
+        JSON.stringify(groundedPlan, null, 2),
         feedback
     );
 
-    return generateWithFallback<ProjectPlan>(projectPlanSchema, prompt);
+    const iteratedPlan = await generateWithFallback<ProjectPlan>(projectPlanSchema, prompt);
+    return {
+        ...iteratedPlan,
+        nivel: currentPlan.nivel,
+        asignaturas_involucradas: currentPlan.asignaturas_involucradas,
+        // Una iteración no puede cambiar el OA oficial sin volver a consultarlo.
+        oas_sugeridos: groundedPlan.oas_sugeridos,
+        oas_oficiales_verificados: verified,
+        fuente_curricular: currentPlan.fuente_curricular,
+        alineacion_oas: verified.length
+            ? buildOfficialAlignments(verified, iteratedPlan)
+            : (iteratedPlan.alineacion_oas ?? currentPlan.alineacion_oas ?? []),
+        ciclo_aprendizaje: iteratedPlan.ciclo_aprendizaje
+            ?? currentPlan.ciclo_aprendizaje
+            ?? groundedPlan.ciclo_aprendizaje,
+        evaluacion: {
+            ...iteratedPlan.evaluacion,
+            evidencia_individual: currentPlan.evaluacion.evidencia_individual
+                || "Registro individual de investigación, participación argumentada, ticket de salida y explicación de los cambios incorporados en la segunda versión.",
+        },
+    };
 }

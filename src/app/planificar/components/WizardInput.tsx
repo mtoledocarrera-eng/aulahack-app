@@ -21,7 +21,7 @@ export function WizardInput({ input, setInput, isLoading, onSubmit }: WizardInpu
         CONTAINS_RUT_REGEX.test(input.nivel || "") ||
         CONTAINS_RUT_REGEX.test(input.asignatura || "");
 
-    const isSubmitDisabled = isLoading || !input.proposito || hasPII;
+    const isSubmitDisabled = isLoading || !input.proposito?.trim() || !input.nivel?.trim() || !input.asignatura?.trim() || hasPII;
     return (
         <div className="animate-fade-in space-y-8">
             <div className="glass-card p-8 text-center bg-gradient-to-br from-brand-600 to-brand-800 text-white">
@@ -44,7 +44,7 @@ export function WizardInput({ input, setInput, isLoading, onSubmit }: WizardInpu
 
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <Label className="text-sm font-medium">Nivel Educativo (Opcional)</Label>
+                            <Label className="text-sm font-medium">Nivel Educativo (necesario para generar)</Label>
                             <Input
                                 type="text"
                                 placeholder="Ej: 8° Básico"
@@ -54,10 +54,10 @@ export function WizardInput({ input, setInput, isLoading, onSubmit }: WizardInpu
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-sm font-medium">Asignatura/Área (Opcional)</Label>
+                            <Label className="text-sm font-medium">Asignaturas (necesarias para generar)</Label>
                             <Input
                                 type="text"
-                                placeholder="Ej: Ciencias o Proyecto Interdisciplinario"
+                                placeholder="Ej: Ciencias Naturales, Matemática e Historia"
                                 value={input.asignatura!}
                                 onChange={(e) => setInput({ ...input, asignatura: e.target.value })}
                                 className="bg-background/50"

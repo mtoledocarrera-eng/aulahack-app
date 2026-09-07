@@ -14,7 +14,7 @@ import {
     StyleSheet,
     Font,
 } from "@react-pdf/renderer";
-import type { ProjectPlan, Rubric } from "@/lib/ai/schemas";
+import type { ProjectPlan, Rubric, LearningCycle } from "@/lib/ai/schemas";
 
 // ─── Styles ──────────────────────────────────────────────────────
 
@@ -128,9 +128,58 @@ const styles = StyleSheet.create({
         color: colors.primary,
         marginBottom: 4,
     },
+    sourceText: {
+        fontSize: 8,
+        color: colors.textMuted,
+        marginBottom: 6,
+    },
     oaText: {
         fontSize: 10,
         lineHeight: 1.4,
+    },
+    alignmentBox: {
+        backgroundColor: colors.successLight,
+        borderRadius: 6,
+        padding: 12,
+        marginBottom: 16,
+        borderLeft: `3px solid ${colors.success}`,
+    },
+    alignmentItem: {
+        paddingBottom: 8,
+        marginBottom: 8,
+        borderBottom: `1px solid ${colors.border}`,
+    },
+    alignmentHeading: {
+        fontSize: 9,
+        fontFamily: "Helvetica-Bold",
+        marginBottom: 3,
+    },
+    alignmentText: {
+        fontSize: 9,
+        lineHeight: 1.35,
+        marginBottom: 2,
+    },
+    cycleBox: {
+        backgroundColor: "#f5f3ff",
+        borderRadius: 6,
+        padding: 12,
+        marginBottom: 16,
+        borderLeft: "3px solid #7c3aed",
+    },
+    cycleItem: {
+        paddingBottom: 6,
+        marginBottom: 6,
+        borderBottom: "1px solid #ddd6fe",
+    },
+    cycleLabel: {
+        fontSize: 9,
+        fontFamily: "Helvetica-Bold",
+        color: "#6d28d9",
+        marginBottom: 2,
+    },
+    cycleText: {
+        fontSize: 9,
+        lineHeight: 1.35,
     },
     // Step Section
     section: {
@@ -255,14 +304,14 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     duaGrid: {
-        flexDirection: "row",
+        flexDirection: "column",
         gap: 8,
     },
     duaCard: {
-        flex: 1,
         backgroundColor: colors.white,
         borderRadius: 4,
         padding: 8,
+        marginBottom: 4,
     },
     duaCardTitle: {
         fontSize: 8,
@@ -402,10 +451,31 @@ export function LessonPlanPDF({ plan, rubric, teacherName }: LessonPlanPDFProps)
                 {/* OA */}
                 <View style={styles.oaBox}>
                     <Text style={styles.oaLabel}>Alineación Curricular y Propósito</Text>
+                    {plan.fuente_curricular && (
+                        <Text style={styles.sourceText}>
+                            {plan.fuente_curricular === "Firestore oficial"
+                                ? "Fuente: objetivos oficiales verificados en Firestore."
+                                : "Fuente: RAG local de apoyo; validar antes de usar como OA oficial."}
+                        </Text>
+                    )}
                     <Text style={styles.oaText}>{plan.oas_sugeridos.join("\n")}</Text>
+
+                    {!!plan.conexiones_interdisciplinarias?.length && (
+                        <>
+                            <Text style={[styles.oaLabel, { marginTop: 8 }]}>Conexiones interdisciplinarias sugeridas (propuesta pedagógica)</Text>
+                            <Text style={styles.oaText}>{plan.conexiones_interdisciplinarias.join("\n")}</Text>
+                        </>
+                    )}
 
                     <Text style={[styles.oaLabel, { marginTop: 8 }]}>Habilidades a Desarrollar:</Text>
                     <Text style={styles.oaText}>{plan.habilidades_desarrolladas.join(", ")}</Text>
+
+                    {plan.evaluacion.evidencia_individual && (
+                        <>
+                            <Text style={[styles.oaLabel, { marginTop: 8 }]}>Evidencia individual del aprendizaje:</Text>
+                            <Text style={styles.oaText}>{plan.evaluacion.evidencia_individual}</Text>
+                        </>
+                    )}
 
                     {plan.indicador_desarrollo_personal_social && (
                         <>
@@ -414,6 +484,21 @@ export function LessonPlanPDF({ plan, rubric, teacherName }: LessonPlanPDFProps)
                         </>
                     )}
                 </View>
+
+                {!!plan.alineacion_oas?.length && (
+                    <View style={styles.alignmentBox}>
+                        <Text style={styles.oaLabel}>Coherencia OA–actividad–evaluación–evidencia</Text>
+                        <Text style={styles.sourceText}>Matriz de revisión pedagógica por OA.</Text>
+                        {plan.alineacion_oas.map((alignment, index) => (
+                            <View key={`${alignment.numero}-${alignment.asignatura}-${index}`} style={styles.alignmentItem} wrap={false}>
+                                <Text style={styles.alignmentHeading}>{/^\d+$/.test(alignment.numero) ? `OA ${alignment.numero}` : alignment.numero} · {alignment.asignatura} · {alignment.fase}</Text>
+                                <Text style={styles.alignmentText}>Actividad: {alignment.actividad}</Text>
+                                <Text style={styles.alignmentText}>Evidencia: {alignment.evidencia}</Text>
+                                <Text style={styles.alignmentText}>Criterio: {alignment.criterio}</Text>
+                            </View>
+                        ))}
+                    </View>
+                )}
 
                 {/* Step 1: Inicio */}
                 <StepSection step={1} title="Preparación / Gancho" data={plan.fase_preparacion} />
@@ -424,18 +509,20 @@ export function LessonPlanPDF({ plan, rubric, teacherName }: LessonPlanPDFProps)
                 {/* Step 3: Cierre */}
                 <StepSection step={3} title="Síntesis y Metacognición" data={plan.fase_sintesis_metacognicion} />
 
+                {plan.ciclo_aprendizaje && <LearningCycleSection cycle={plan.ciclo_aprendizaje} />}
+
                 {/* Guía Docente */}
                 {plan.guia_docente && (
                     <View style={styles.section}>
                         <View style={styles.guideBox}>
                             <Text style={styles.guideTitle}>Guía para el Docente</Text>
-                            <Text style={styles.guideItemTitle}>🎯 Estrategia Motivacional:</Text>
+                            <Text style={styles.guideItemTitle}>Estrategia Motivacional:</Text>
                             <Text style={styles.guideItemText}>{plan.guia_docente.estrategia_motivacional}</Text>
 
-                            <Text style={styles.guideItemTitle}>🚧 Posibles Obstáculos y Soluciones:</Text>
+                            <Text style={styles.guideItemTitle}>Posibles Obstáculos y Soluciones:</Text>
                             <Text style={styles.guideItemText}>{plan.guia_docente.posibles_obstaculos_y_soluciones}</Text>
 
-                            <Text style={styles.guideItemTitle}>🌍 Conexiones con la Vida Real:</Text>
+                            <Text style={styles.guideItemTitle}>Conexiones con la Vida Real:</Text>
                             <Text style={styles.guideItemText}>{plan.guia_docente.conexiones_vida_real}</Text>
                         </View>
                     </View>
@@ -606,6 +693,41 @@ export function LessonPlanPDF({ plan, rubric, teacherName }: LessonPlanPDFProps)
     );
 }
 
+function LearningCycleSection({ cycle }: { cycle: LearningCycle }) {
+    const steps: Array<[string, string]> = [
+        ["1. Pregunta o desafío", cycle.pregunta_desafio],
+        ["2. Hipótesis o conjetura inicial", cycle.hipotesis_conjetura_inicial],
+        ["3. Experimentación u observación", cycle.experimentacion_observacion],
+        ["4. Evidencia a recoger", cycle.evidencia_a_recoger],
+        ["5. Registro anecdótico docente", cycle.registro_anecdotico_docente],
+        ["6. Feedback formativo", cycle.feedback_formativo],
+        ["7. Revisión y mejora", cycle.revision_mejora],
+        ["8. Nueva explicación", cycle.nueva_explicacion],
+        ["9. Presentación o transferencia", cycle.presentacion_transferencia],
+    ];
+
+    return (
+        <View style={styles.cycleBox}>
+            <Text style={styles.oaLabel}>Ciclo de aprender haciendo</Text>
+            <Text style={styles.sourceText}>Secuencia para observar la evolución de la comprensión y el aprendizaje individual.</Text>
+            {steps.map(([label, value]) => (
+                <View key={label} style={styles.cycleItem}>
+                    <Text style={styles.cycleLabel}>{label}</Text>
+                    <Text style={styles.cycleText}>{value}</Text>
+                </View>
+            ))}
+            <View style={styles.cycleItem}>
+                <Text style={styles.cycleLabel}>Evidencia individual del proceso</Text>
+                <Text style={styles.cycleText}>{cycle.evidencia_individual_proceso}</Text>
+            </View>
+            <Text style={styles.cycleLabel}>Preguntas metacognitivas</Text>
+            {cycle.preguntas_metacognitivas.map((question, index) => (
+                <Text key={index} style={styles.cycleText}>• {question}</Text>
+            ))}
+        </View>
+    );
+}
+
 // ─── Sub-components ──────────────────────────────────────────────
 
 function StepSection({
@@ -647,11 +769,11 @@ function StepSection({
                     </View>
                 )}
                 <Text style={styles.teacherNote}>
-                    💡 Mediación: {data.rol_docente}
+                        Mediación: {data.rol_docente}
                 </Text>
                 {data.tips_gestion_aula && (
                     <Text style={styles.teacherTip}>
-                        🛡️ Tip de Aula: {data.tips_gestion_aula}
+                        Tip de Aula: {data.tips_gestion_aula}
                     </Text>
                 )}
             </View>
