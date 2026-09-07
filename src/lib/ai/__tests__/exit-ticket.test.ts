@@ -100,4 +100,17 @@ describe("Ticket de salida de Aprender a aprender", () => {
         expect(ticket.extension_visual.titulo).toContain("opcional");
         expect(exitTicketSchema.safeParse(ticket).success).toBe(true);
     });
+
+    it("normaliza el prefijo OA cuando la alineación ya lo incluye", () => {
+        const ticket = buildUniversalExitTicket({
+            ...mockPlan,
+            alineacion_oas: [{
+                ...mockPlan.alineacion_oas![0],
+                numero: "OA 8",
+            }],
+        });
+
+        expect(ticket.preguntas[0].enunciado).toContain("sobre el OA 8 de Ciencias Naturales");
+        expect(ticket.preguntas[0].enunciado).not.toContain("OA OA");
+    });
 });

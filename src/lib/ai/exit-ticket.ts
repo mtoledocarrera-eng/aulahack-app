@@ -10,8 +10,9 @@ import type { ExitTicket, ProjectPlan } from "./schemas";
  */
 export function buildUniversalExitTicket(plan: ProjectPlan): ExitTicket {
     const firstAlignment = plan.alineacion_oas?.[0];
+    const oaNumber = firstAlignment?.numero.replace(/^OA\s*/i, "").trim();
     const oaFocus = firstAlignment
-        ? `el OA ${firstAlignment.numero} de ${firstAlignment.asignatura}`
+        ? `el OA ${oaNumber} de ${firstAlignment.asignatura}`
         : "el aprendizaje trabajado";
 
     return {
